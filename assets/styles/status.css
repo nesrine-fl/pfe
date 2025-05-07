@@ -1,0 +1,806 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+body {
+    font-family: 'Poppins', sans-serif;
+    background: #3E367B;;
+    color: white;
+   
+    margin: 0;
+    padding: 0; 
+  overflow-x: hidden;
+}
+
+.upbar{
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 10px 20px;
+}
+.profileimg{
+  width: 70px;
+  height: 70px;
+}
+
+  #add-formation {
+    background: gray;
+  color: black;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+
+}
+
+
+#add-formation:hover{
+  background: #1A0495;
+  color: white;
+}
+
+.add-training {
+    background: #1A0495;
+    color: white;
+    padding: 20px 30px;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+   align-items: right;
+}
+
+.container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding: 20px;
+    margin-top: 20px;
+}
+
+/* .form-container {
+    max-width: 80%;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+} */
+
+.table-container {
+    width: 80%;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.table-center{
+  
+  display: flex;
+  justify-content: center;
+  margin-bottom: 50px;
+}
+
+/* Style pour le formulaire */
+
+
+#formation-form input[type="text"],
+#formation-form input[type="date"],
+#formation-form input[type="time"],
+#formation-form select,
+#formation-form textarea {
+    width: 90%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-top: 5px;
+    margin-bottom: 10px;
+}
+
+#formation-form textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+/* Style pour le tableau */
+.table-status {
+    width: 100%;
+    border-collapse: collapse;
+    color: black;
+}
+
+.table-status th,
+.table-status td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.table-status th {
+    background-color: #f5f5f5;
+    font-weight: bold;
+    color: #333;
+}
+
+/* Styles pour les statuts */
+.status {
+    padding: 6px 12px;
+    border-radius: 15px;
+    font-weight: 500;
+    display: inline-block;
+    margin-right: 10px;
+}
+
+.status.en-attente {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.status.validé {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.status.refusé {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+/* Boutons d'action */
+.validate-btn,
+.refuse-btn {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    margin-left: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.validate-btn {
+    background-color: #28a745;
+    color: white;
+}
+
+.refuse-btn {
+    background-color: #dc3545;
+    color: white;
+}
+
+.validate-btn:hover {
+    background-color: #218838;
+}
+
+.refuse-btn:hover {
+    background-color: #c82333;
+}
+
+/* Style pour le bouton submit */
+.submit {
+  font-weight: bold;
+  color: black;
+  background:#D28C64;
+  border-radius: 10px;
+  padding: 5px 20px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  border: 3px solid transparent;
+  cursor: pointer;
+}
+
+.submit:hover {
+    background-color: #b6744e;
+}
+
+/* Style pour l'aperçu de l'image */
+#preview {
+    max-width: 200px;
+    margin-top: 10px;
+    border-radius: 4px;
+    display: none;
+}
+
+.custom-file-upload {
+    display: inline-block;
+    padding: 8px 12px;
+    cursor: pointer;
+    background-color: gray;
+    color: white;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.custom-file-upload:hover {
+    background-color: #666;
+}
+
+/* Responsive design */
+@media (max-width: 992px) {
+    .container {
+        flex-direction: column;
+    }
+
+    
+}
+
+.failed {
+background-color: #ffc6cf;
+color: rgb(249, 77, 77);
+border-radius: 20px;
+padding: 8px 12px;
+}
+
+.warning {
+background-color: #ffeac2;
+color: #000000;
+border-radius: 20px;
+padding: 8px 12px;
+}
+
+.processing {
+background-color: #cbe9ff;
+color: rgb(0, 0, 0);
+border-radius: 20px;
+padding: 8px 12px;
+}
+
+.verified {
+background-color: #deffd2;
+color: rgb(0, 0, 0);
+border-radius: 20px;
+padding: 8px 12px;
+}
+
+.form-container {
+    background: white;
+    color: black;
+    width: 50%;
+    margin: 20px auto;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: left;
+}
+
+form input, textarea {
+    width: 90%;
+    padding: 8px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.cancel{
+  font-weight: bold;
+  color: white;
+  border: 2px solid #1A0495;
+  background:#1A0495;
+  border-radius: 10px;
+  padding: 10px 20px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  border: 3px solid transparent;
+  cursor: pointer;
+}
+.cancel:hover{
+  background:#34287a;
+}
+
+footer {
+    margin-top: 20px;
+
+}
+
+.socials i {
+    margin: 0 10px;
+    font-size: 20px;
+    cursor: pointer;
+    padding: auto;
+}
+
+.menu-icon {
+
+    font-size: 25px;
+    cursor: pointer;
+    position: fixed;
+    top: 15px;
+    left: 15px;
+
+}
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: -250px; /* Sidebar is hidden by default */
+  width: 250px;
+  height: 100%;
+  background: #ffffff;
+  color: #333;
+  transition: left 0.3s ease-in-out;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
+  border-right: 1px solid #ddd;
+  overflow-y: auto;        
+  overflow-x: hidden;      
+  }
+  
+  /* icons */
+  
+  /* Style for icons */
+  .sidebar ul li a i,
+  .sidebar-footer a i {
+  margin-right: 10px;
+  font-size: 18px;
+  color: #555;
+  transition: color 0.3s ease-in-out;
+  }
+  
+  /* Change icon color on hover */
+  .sidebar ul li a:hover i,
+  .sidebar-footer a:hover i {
+  color: blue;
+  }
+  .sidebar-footer .logout:hover i{
+  color: red;
+  }
+  
+  /* ✖ Close Button */
+  .close-btn {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  background: none;
+  border: none;
+  color: #333;
+  font-size: 22px;
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out;
+  }
+  
+  .close-btn:hover {
+  color: red;
+  }
+  
+  /* 📌 Sidebar Navigation Links */
+  .sidebar ul {
+  list-style: none;
+  padding: 0;
+  margin: 60px 0 0;
+  }
+  
+  .sidebar ul li {
+  padding: 15px;
+  transition: all 0.3s ease-in-out;
+  cursor: pointer;
+  }
+  
+  .sidebar ul li:hover {
+  background: #f0f0f0;
+  }
+  
+  /* 🌟 Sidebar Links */
+  .sidebar ul li a {
+  display: flex;
+  align-items: center;
+  color: #333;
+  text-decoration: none;
+  padding: 12px;
+  font-weight: 600;
+  transition: all 0.3s ease-in-out;
+  border-radius: 5px;
+  }
+  
+  .sidebar ul li a:hover {
+  background: rgba(0, 0, 255, 0.1);
+  color: blue;
+  transform: translateX(5px);
+  }
+  
+  /* 🔵 Active Link */
+  .sidebar ul li a.active {
+  color: blue;
+  border-left: 4px solid blue;
+  background: rgba(0, 0, 255, 0.1);
+  }
+  
+  /* ⚙ Sidebar Footer (Settings & Logout) */
+  .sidebar-footer {
+  padding: 15px;
+  border-top: 1px solid #ddd;
+  display: flex;
+  flex-direction: column;
+  }
+  
+  .sidebar-footer a {
+  display: flex;
+  align-items: center;
+  color: #333;
+  text-decoration: none;
+  font-size: 18px;
+  padding: 12px;
+  font-weight: 600;
+  transition: all 0.3s ease-in-out;
+  }
+  
+  .sidebar-footer a:hover {
+  background: rgba(0, 0, 255, 0.1);
+  color: blue;
+  transform: translateX(5px);
+  }
+  
+  /* 🔴 Logout Button */
+  .sidebar-footer .logout {
+  color: red;
+  font-weight: bold;
+  }
+  
+  .sidebar-footer .logout:hover {
+  background: rgba(255, 0, 0, 0.1);
+  color: darkred;
+  }
+  
+  /* 📌 Sidebar Visibility */
+  .sidebar.active {
+  left: 0;
+  }
+  
+  /* Styling for the card modal */
+.edit-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5); /* Overlay */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.card {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  width: 80%;
+  max-width: 600px;
+}
+
+.card h3 {
+  text-align: center;
+  font-size: 1.5em;
+  margin-bottom: 20px;
+}
+
+.card form {
+  display: flex;
+  flex-direction: column;
+}
+
+.card form label {
+  font-weight: bold;
+  margin: 10px 0 5px;
+}
+
+.card form input,
+.card form textarea {
+  padding: 10px;
+  margin-bottom: 20px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 1em;
+}
+
+.card form .buttons {
+  display: flex;
+  justify-content: space-between;
+}
+
+.card form .buttons button {
+  padding: 10px 20px;
+  font-size: 1em;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.card form .cancel {
+  background-color: #f44336;
+  color: white;
+}
+
+.card form .submit {
+  background-color: #4CAF50;
+  color: white;
+}
+
+
+  .profile-icon {
+    position: right; /* Freely position it */
+    top: 10px; /* Distance from the top */
+    right: 10px; /* Moves it to the right */
+    width: 40px; /* Size of the icon */
+    height: 40px;
+    background-color: #ffffff; /* White background */
+    border-radius: 50%; /* Makes it a circle */
+    border: 2px solid #7162E1; /* Purple border */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+  }
+  
+  /* SVG Icon inside */
+  .profile-icon svg {
+    width: 2px;
+    height: 24px;
+    fill: #7162E1; /* Purple color */
+  }
+  
+  
+  main {
+    padding: 0px;
+  }
+  /* Section contact */
+
+
+  .contact {
+    margin-top: 50px;
+    background: linear-gradient(to right, #6759CD, #342D67);
+    color: #ffffff;
+    padding: 1rem;
+    }
+    ul {
+    list-style: none;
+    }
+    
+    .example-2 {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    margin-top: 10px;
+    }
+    .example-2 .icon-content {
+    margin: 0 10px;
+    position: relative;
+    }
+    
+    .example-2 .icon-content a {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    color: #4d4d4d;
+    background-color: #fff;
+    transition: all 0.3s ease-in-out;
+    }
+    
+    .example-2 .icon-content a:hover {
+    box-shadow: 3px 2px 45px 0px rgb(0 0 0 / 12%);
+    }
+    
+    .example-2 .icon-content a svg {
+    position: relative;
+    z-index: 1;
+    width: 25px;
+    height: 25px;
+    }
+    
+    .example-2 .icon-content a:hover {
+    color: white;
+    }
+    
+    .example-2 .icon-content a .filled {
+    position: absolute;
+    top: auto;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 0;
+    background-color: #000;
+    transition: all 0.3s ease-in-out;
+    }
+    .example-2 .icon-content a:hover .filled {
+    height: 100%;
+    }
+    
+    .example-2 .icon-content a[data-social="linkedin"] .filled,
+    .example-2 .icon-content a[data-social="linkedin"] ~ .tooltip {
+    background-color: #0274b3;
+    }
+    
+    .example-2 .icon-content a[data-social="facebook"] .filled,
+    .example-2 .icon-content a[data-social="facebook"] ~ .tooltip {
+    background-color: #3b5998;
+    }
+    .example-2 .icon-content a[data-social="instagram"] .filled,
+    .example-2 .icon-content a[data-social="instagram"] ~ .tooltip {
+    background: linear-gradient(
+      45deg,
+      #405de6,
+      #5b51db,
+      #b33ab4,
+      #c135b4,
+      #e1306c,
+      #fd1f1f
+    );
+    }
+    .example-2 .icon-content a[data-social="youtube"] .filled,
+    .example-2 .icon-content a[data-social="youtube"] ~ .tooltip {
+    background-color: #ff0000;
+    }  
+    .couleur{
+    color:  #D28C64;
+    }
+    
+    
+    .container-contact {
+      margin-top: 50px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    max-width: 1450px;
+    margin: 0 auto;
+    }
+    
+    .partie-d{
+    flex: 0;
+    min-width: 300px;
+    margin: 1rem;
+    }
+    
+    .partie-g{
+    flex: 1;
+    min-width: 300px;
+    margin: 1rem;
+    padding-right: 20%;
+    }
+    
+    .gauche  {
+    display: flex;
+    justify-content:start;
+    align-items: center;
+    }
+    
+    
+    .gauche img, footer {
+    width: 200px;
+    height: 150px;
+    color: white;
+    }
+    
+    
+    
+    .photo-reseau {
+    width: 100%;
+    max-width: 200px;
+    
+    }
+    
+    footer {
+    text-align: start;
+    font-size: 0.7rem;
+    margin-top: 0.5rem;
+    width: auto;
+    height:auto ;
+    }
+
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  /* Centrer le header */
+  .top-bar {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      text-align: center;
+      justify-content: space-between;
+  }
+  header{
+      width: 90%;
+  }
+
+  /* Faire monter le titre */
+  .top-bar h1 {
+      font-size: 32px;
+  }
+
+  /* Centrer la photo de profil */
+  .profile-picture {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+  }
+
+  /* Ajuster la taille de la photo */
+  .profile-picture img {
+      width: 80px;
+      height: 80px;
+      padding-right: 5px;
+      background-color: transparent;
+  }
+  .menu-icon{
+      padding-left: 5px;
+  }
+  .container-contact{
+    flex-direction: column;
+}
+
+}
+main{
+  margin-bottom: 100px;
+}
+
+.container{
+  display: flex;
+  justify-content: flex-start;
+  margin-left: 50px;
+  align-items: center;
+}
+
+
+
+/* 
+
+.file-upload {
+ margin-top: 10px;
+ margin-bottom: 20px;
+}
+
+.file-upload  {
+
+  width: 50%;
+  height: 50%;
+  cursor: pointer;
+}
+
+.file-upload {
+  display: inline-block;
+  background-color: gray;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-family: sans-serif;
+} */
+.custom-file-upload {
+  display: inline-block;
+  padding: 10px 10px;
+  cursor: pointer;
+  background-color: gray;
+  color: white;
+  border-radius: 5px;
+  font-family: sans-serif;
+  margin-bottom: 10px;
+  margin-top: 10px;
+  border: 3px solid transparent;
+}
+
+.custom-file-upload i {
+  padding: 3px 30px;
+}
+
+input[type="file"] {
+  display: none;
+}
+#preview {
+  margin-top: 5px;
+  max-width: 50%;
+  height: auto;
+  border-radius: 8px;
+  display: none;
+  margin-bottom: 20px;
+}
+.custom-file-upload:hover {
+  border: 3px solid #1A0495;
+}

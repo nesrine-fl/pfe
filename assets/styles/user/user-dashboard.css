@@ -1,0 +1,1055 @@
+/* Styles globaux */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #6759CD, #342D67);
+    color: white;
+    margin: 0;
+    padding: 0;
+}
+*{
+    font-family: "Poppins", sans-serif;
+    
+      
+}
+/* Barre de navigation  */
+header {
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    padding: 15px 30px;
+
+}
+
+.upbar {
+    height: 10vh;
+    margin-top: 10px;
+    margin-bottom: 25px;
+    display : flex;
+    justify-content: space-between;
+    flex-direction: row;
+    align-items: center;
+
+}
+.upbar > * {
+    display: flex;
+    align-items: center;
+  }
+  
+.menuicon{
+    width: 30px;
+    cursor: pointer;
+}
+.search-wrapper {
+    position: relative;
+    width: 40%;
+}
+.input-container {
+    width: 100%;
+    height: 40px;
+    padding: 0 30px 0 15px; /* Padding to leave space for the icon on the right */
+    border-radius: 10px;
+    border: 3px solid transparent;
+    box-shadow: 0px 3px 4px gray;
+    outline: none;
+    padding: 0 40px 0 15px;
+}
+
+.input-container:focus {
+    border: 3px solid gray;
+    box-shadow: none;
+}
+
+.search-icon {
+    position: absolute;
+    right: 10px; /* Distance from the right side */
+    top: 50%;
+    transform: translateY(-50%); /* Vertically center the icon */
+    color: gray; /* Icon color */
+    cursor: pointer;
+    font-size: 18px; /* Adjust icon size */
+}
+.menu-container {
+    display: flex;
+    align-items: center;
+  }
+
+.profileimg {
+    margin-top: 10px;
+    width: 70px;
+    height: 70px;
+    display: flex;
+    align-items: center;
+}
+
+/* 🌟 Sidebar Container */
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: -250px; /* Sidebar is hidden by default */
+    width: 250px;
+    height: 100%;
+    background: #ffffff;
+    color: #333;
+    transition: left 0.3s ease-in-out;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
+    border-right: 1px solid #ddd;
+    font-size: 16px;
+}
+
+/* icons */
+
+/* Style for icons */
+.sidebar ul li a i,
+.sidebar-footer a i {
+    margin-right: 10px;
+    font-size: 15px;
+    color: #555;
+    transition: color 0.3s ease-in-out;
+}
+
+/* Change icon color on hover */
+.sidebar ul li a:hover i,
+.sidebar-footer a:hover i {
+    color: blue;
+}
+.sidebar-footer .logout:hover i{
+    color: red;
+}
+
+/* ✖ Close Button */
+.close-btn {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    background: none;
+    border: none;
+    color: #333;
+    font-size: 22px;
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out;
+
+}
+
+.close-btn:focus:not(:focus-visible) {
+    outline: none;
+    box-shadow: none;
+  }
+
+
+.close-btn:hover {
+    color: red;
+}
+
+/* 📌 Sidebar Navigation Links */
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+    margin: 60px 0 0;
+}
+
+.sidebar ul li {
+    padding: 15px;
+    transition: all 0.3s ease-in-out;
+    cursor: pointer;
+}
+
+.sidebar ul li:hover {
+    background: #f0f0f0;
+}
+
+/* 🌟 Sidebar Links */
+.sidebar ul li a {
+    display: flex;
+    align-items: center;
+    color: #333;
+    text-decoration: none;
+    padding: 12px;
+    font-weight: 600;
+    transition: all 0.3s ease-in-out;
+    border-radius: 5px;
+}
+
+.sidebar ul li a:hover {
+    background: rgba(0, 0, 255, 0.1);
+    color: blue;
+    transform: translateX(5px);
+}
+
+/* 🔵 Active Link */
+.sidebar ul li a.active {
+    color: blue;
+    border-left: 4px solid blue;
+    background: rgba(0, 0, 255, 0.1);
+}
+
+/* ⚙ Sidebar Footer (Settings & Logout) */
+.sidebar-footer {
+    padding: 15px;
+    border-top: 1px solid #ddd;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-footer a {
+    display: flex;
+    align-items: center;
+    color: #333;
+    text-decoration: none;
+    font-size: 18px;
+    padding: 12px;
+    font-weight: 600;
+
+    transition: all 0.3s ease-in-out;
+}
+
+.sidebar-footer a:hover {
+    background: rgba(0, 0, 255, 0.1);
+    color: blue;
+    transform: translateX(5px);
+}
+
+/* 🔴 Logout Button */
+.sidebar-footer .logout {
+    color: red;
+    font-weight: bold;
+}
+
+.sidebar-footer .logout:hover {
+    background: rgba(255, 0, 0, 0.1);
+    color: darkred;
+}
+
+/* 📌 Sidebar Visibility */
+.sidebar.active {
+    left: 0;
+}
+
+
+
+/* Profil */
+.profile , .image{
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    padding-top: 0;
+}
+.image:hover{
+    box-shadow: none;
+    border: none;
+}
+
+
+/* Section de bienvenue */
+.welcome {
+    text-align: center;
+
+}
+
+.welcome h1 {
+    font-size: 45px;
+}
+
+.welcome span {
+    color: #D28C64;
+}
+
+.welcome p {
+    font-size: 16px;
+}
+
+.welcome h2 {
+    margin-bottom: 20px;
+}
+/* formation*/ 
+.formation{
+    background-color: #ffffff;
+}
+
+/* Cours récents */
+.recent-courses, .domains {
+    padding: 20px;
+}
+.mydict{
+    padding-bottom: 30px;
+}
+:focus {
+  outline: 0;
+  border-color: #6759CD;
+  box-shadow: 0 0 0 4px #b5c9fc;
+}
+
+.mydict div {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+  justify-content: center;
+}
+
+.mydict input[type="radio"] {
+  clip: rect(0 0 0 0);
+  clip-path: inset(100%);
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}
+
+.mydict input[type="radio"]:checked + span {
+  box-shadow: 0 0 0 0.0625em #6759CD;
+  background-color: #dee7ff;
+  z-index: 1;
+  color: #6759CD;
+}
+
+label span {
+  display: block;
+  cursor: pointer;
+  background-color: #fff;
+  padding: 0.375em .75em;
+  position: relative;
+  margin-left: .0625em;
+  box-shadow: 0 0 0 0.0625em #b5bfd9;
+  letter-spacing: .05em;
+  color: #3e4963;
+  text-align: center;
+  transition: background-color .5s ease;
+}
+
+label:first-child span {
+  border-radius: .375em 0 0 .375em;
+}
+
+label:last-child span {
+  border-radius: 0 .375em .375em 0;
+}
+
+
+.recent-courses h2{
+    color: black;
+    margin-left: 10px;
+}
+.course-container {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.course-card {
+    background: rgb(237, 237, 237);
+    color: black;
+    padding: 15px;
+    border-radius: 10px;
+    text-align: center;
+    width: 200px;
+    transition: transform 0.3s;
+    border: 0.5px solid lightgray;
+    cursor: pointer;
+    
+}
+
+.course-card:hover {
+    transform: scale(1.05);
+}
+
+.formation img {
+    width: 200px;
+    height: 100px;
+}
+
+.formation p{
+    font-size: 14px;
+}
+
+/* Catégories */
+
+.domains h2{
+    color: black;
+    margin-left: 10px;
+}
+.categories {
+    display: flex;
+    justify-content: center;
+    gap: 35px;
+    margin-top: 5px;
+    color: black;
+    margin-bottom: 15px;
+}
+
+.categories span {
+    cursor: pointer;
+    padding: 5px 15px;
+    border-bottom: 2px solid transparent;
+}
+
+.categories .active {
+    border-bottom: 2px solid black;
+}
+
+/* Pied de page */
+/* Pied de page */
+
+.contact {
+    background: linear-gradient(to right, #6759CD, #342D67);
+    color: #ffffff;
+
+}
+ul {
+    list-style: none;
+}
+  
+.example-2 {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    margin-top: 10px;
+}
+.example-2 .icon-content {
+    margin: 0 10px;
+    position: relative;
+}
+
+  .example-2 .icon-content a {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    color: #4d4d4d;
+    background-color: #fff;
+    transition: all 0.3s ease-in-out;
+  }
+
+  .example-2 .icon-content a:hover {
+    box-shadow: 3px 2px 45px 0px rgb(0 0 0 / 12%);
+  }
+
+  .example-2 .icon-content a svg {
+    position: relative;
+    z-index: 1;
+    width: 25px;
+    height: 25px;
+  }
+
+  .example-2 .icon-content a:hover {
+    color: white;
+  }
+
+  .example-2 .icon-content a .filled {
+    position: absolute;
+    top: auto;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 0;
+    background-color: #000;
+    transition: all 0.3s ease-in-out;
+  }
+  .example-2 .icon-content a:hover .filled {
+    height: 100%;
+  }
+  
+  .example-2 .icon-content a[data-social="linkedin"] .filled,
+  .example-2 .icon-content a[data-social="linkedin"] ~ .tooltip {
+    background-color: #0274b3;
+  }
+  
+  .example-2 .icon-content a[data-social="facebook"] .filled,
+  .example-2 .icon-content a[data-social="facebook"] ~ .tooltip {
+    background-color: #3b5998;
+  }
+  .example-2 .icon-content a[data-social="instagram"] .filled,
+  .example-2 .icon-content a[data-social="instagram"] ~ .tooltip {
+    background: linear-gradient(
+      45deg,
+      #405de6,
+      #5b51db,
+      #b33ab4,
+      #c135b4,
+      #e1306c,
+      #fd1f1f
+    );
+  }
+  .example-2 .icon-content a[data-social="youtube"] .filled,
+  .example-2 .icon-content a[data-social="youtube"] ~ .tooltip {
+    background-color: #ff0000;
+  }  
+.couleur{
+    color:  #D28C64;
+}
+
+
+.container-contact {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    max-width: 1450px;
+    margin: 0 auto;
+}
+
+.partie-d{
+    flex: 0;
+    min-width: 300px;
+    margin: 1rem;
+}
+
+.partie-g{
+    flex: 1;
+    min-width: 300px;
+    margin: 1rem;
+    padding-right: 20%;
+}
+
+.gauche  {
+  display: flex;
+  justify-content:start;
+    align-items: center;
+}
+
+
+.gauche img, footer {
+    width: 200px;
+    height: 150px;
+    color: white;
+}
+
+
+
+.photo-reseau {
+    width: 100%;
+    max-width: 200px;
+ 
+}
+
+footer {
+    text-align: start;
+    font-size: 0.7rem;
+    margin-top: 0.5rem;
+    width: auto;
+    height:auto ;
+}
+
+
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .container-contact {
+        flex-direction: column;
+  
+    }
+  
+    .top-bar {
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-between;
+    }
+  
+    .image{
+        display: none;
+    }
+
+    .logo{ 
+        display: flex;
+        justify-content: space-between;
+        width: 80%;
+        margin-top: 10px;
+        margin-right: 25%;
+    }
+    .welcome h1{
+        padding-left:20px ;
+        padding-right:20px ;
+        
+    }
+
+    .search-bar {
+        max-width: 300px;
+        width: 70%;
+    }
+
+    .course-container {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .course-card {
+        width: 90%;
+        max-width: 300px;
+    }
+}
+.sidebar2 {
+    position: fixed;
+    top: 0;
+    right: -350px; /* Move further out */
+    width: 250px;
+    height: 100%;
+    background:white;
+    color: black;
+    padding: 20px;
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.2);
+    transition: right 0.3s ease-in-out;
+    z-index: 1000;
+    overflow-y: auto;         /* Enable vertical scroll if needed */
+    overflow-x: hidden;       /* Disable horizontal scroll */
+    overflow-y: auto;         /* Enable vertical scroll if needed */
+    overflow-x: hidden;       /* Disable horizontal scroll */          /* Optional spacing inside */
+   
+
+  }
+  
+  /* Close Button */
+  .close-btn2 {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 24px;
+    cursor: pointer;
+    color: #000;
+  }
+  
+  /* Overlay */
+  .overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: none; /* Hidden initially */
+    z-index: 999;
+  }
+  
+  /* Show Sidebar */
+  .sidebar2.show {
+    right: 0;
+  }
+  
+  /* Hide Sidebar (force it to move completely out) */
+  .sidebar2.hide {
+    right: -350px; /* Move further left */
+  }
+  
+  /* Show Overlay */
+  .overlay.show {
+    display: block;
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  .profile-side-bar{
+    width:270px;
+    height: 180px;
+    background: #1A0495;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    /* justify-content: center; */
+    align-items: center;
+    margin-top: 25px;
+    gap: 10px;
+    padding-top:20px ;
+  }
+
+
+
+.rh-commun{
+    border-radius:10px;
+    width: 90px;
+    height: 60px;
+}
+
+.wrapper2{
+    margin-top: 15px;
+    background:  #1A0495;
+    border-radius: 10px;
+    width: 270px;
+    color: white;
+}
+.wrapper2 header{
+    display: flex;
+    align-items: center;
+    padding-top:10px;
+    padding-bottom: 10px;
+    padding-left: 20px;
+    padding-right: 20px;
+    justify-content: space-between;
+  
+}
+header .icons2{
+    display: flex;
+    gap: 10px;
+    cursor: pointer;
+}
+header .icons2 img{
+    height: 38px;
+    width: 38px;
+    margin: 0 1px;
+    cursor: pointer;
+    color: #878787;
+    text-align: center;
+    line-height: 38px;
+    font-size: 1.9rem;
+    user-select: none;            
+    border-radius: 50%;
+
+}
+.icons2 img:last-child{
+    margin-right: -10px;
+}
+header .icons2 img:hover {
+    background: #f2f2f2;
+    cursor: pointer;
+}
+header .current-date2 {
+    font-size: 1.45rem;
+    font-weight: 500;
+    color: white !important;
+}
+.calendar2{
+    padding: 20px;
+    padding-top: 10px;
+
+}
+
+.calendar2 ul{
+    display: flex;
+    list-style: none;
+    flex-wrap: wrap;
+    color: black;
+    text-align: center;
+}
+.calendar2 .days{
+    margin-bottom: 20px;
+}
+.calendar2 li{
+    color: white;
+
+    width: calc(100% / 7);
+    font-size: 15px;
+    cursor: pointer;
+}
+.calendar2 .weeks li {
+    font-weight: 500;
+    cursor: default;
+}
+.calendar2 .days li {
+    z-index: 1;
+    cursor: pointer;
+    position: relative;
+    margin-top: 30px;
+    /* background-color: red; */
+}
+.course{
+    background: red;
+    width: 30px;
+    border-radius: 50%;
+    height: 30px;
+    
+}
+/* .calendar ul li {
+    position: relative;
+    width: calc(100% / 7);
+} */
+
+.days2 li.inactive{
+    color: #aaa;
+    
+  }
+  .days2 li.active{
+    color: #fff;
+  }
+  .days2 li::before{
+    position: absolute;
+    content: "";
+    left: 50%;
+    top: 50%;
+    height: 40px;
+    width: 40px;
+    z-index: -1;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+  }
+  /* .days .cours::before{
+    position: absolute;
+    content: "";
+    left: 50%;
+    top: 50%;
+    height: 40px;
+    width: 40px;
+    z-index: -1;
+    border-radius: 50%;
+    /* transform: translate(-50%, -50%); */
+  
+  .days2 li.active::before{
+    background: #1A0495;
+  }
+  .days2 li:not(.active):hover::before{
+    background: #f2f2f2;
+  }
+  /* .course {
+    background: red;
+    /* background: #f2f2f2; */
+  
+
+
+  .cours {
+    background: #D28C64;
+    border-radius: 50%;
+    color: black!important;
+  }
+
+
+
+
+/* .header p{
+    color: black;
+}
+.weeks li{
+    color: black;
+}
+.days li{
+    color: black;
+    
+} */
+
+
+.cours-sidebar{
+    width: 16.875rem;
+    height: auto;
+    margin-top: 20px;
+    border-radius: 10px;
+    background: #d4d4d4;
+    position: center;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    box-sizing: border-box; 
+    padding-bottom: 5px;
+    padding-right: 5px;
+    padding-top: 5px;
+    padding-left: 5px;
+}
+.cours-sidebar p{
+    font-size: 10px;
+    color: black;
+    
+} 
+.infooo{
+    margin-left: 10px;
+    margin-top: 5px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5px;
+    font-weight: bold;
+}
+.nom-cour{
+    font-size: 10px;
+    color: black;
+    word-break: break-word;
+}
+.date-cour2{
+    color: #1A0495 !important;
+}
+
+
+
+*{
+    margin: 0;
+    padding: 0;
+    font-family: "Poppins",sans-serif;
+    /* box-sizing: border-box; */
+}
+
+.profileimg {
+    margin-top: 10px;
+    width: 70px;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    outline: 0;
+}
+.profile-sidebar-text{
+    color: white;
+}
+
+.formation{
+    background-color: white;
+    
+}
+/* Section cours récents */
+.recent-courses h2 {
+    color: black;
+    padding: 30px 20px 0;
+}
+
+.course-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+    padding: 20px;
+}
+
+/* Section cours récents */
+.recent-courses h2 {
+    color: black;
+    padding: 30px 20px 0;
+}
+
+.course-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+    padding: 20px;
+}
+
+/* Style des cartes de cours */
+.course-card {
+    position: relative; /* Permet de positionner le badge correctement */
+    display: inline-block;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    width: 250px; /* Ajuste la largeur */
+}
+
+.badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: red;
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+    padding: 5px 12px;
+    border-radius: 15px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+.courses-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0px;
+}
+
+
+
+
+
+
+.course-card:hover {
+    transform: scale(1.05);
+}
+
+.course-card img {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 5px;
+}
+
+.department {
+    display: inline-block;
+    background: #E2D5FF;
+    color: #702dff;
+    font-size: 12px;
+    padding: 5px 10px;
+    border-radius: 10px;
+    margin: 5px 0;
+    font-weight: bold;
+}
+
+.course-card h3 {
+    font-size: 14px;
+    font-weight: bold;
+    color: black;
+    margin-bottom: 5px;
+}
+
+.course-card p {
+    font-size: 12px;
+    color: #444;
+    margin: 0;
+}
+#profile-link:focus:not(:focus-visible) {
+    outline: none;
+    box-shadow: none;
+  }
+  
+.has-unread .notification-dot,
+.sidebar-link.has-unread .notification-dot {
+    display: block !important;
+}
+
+
+
+
+.notification-dot {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    width: 8px;
+    height: 8px;
+    background-color: #ff0000;
+    border-radius: 50%;
+    display: none;
+    border: 1.5px solid #ffffff;
+    z-index: 2;
+    pointer-events: none;
+}
+.sidebar ul li a i {
+    position: relative; /* nécessaire pour que .notification-dot soit positionné par rapport à l’icône */
+  }
+  
+  .notification-dot {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    width: 8px;
+    height: 8px;
+    background-color: red;
+    border-radius: 50%;
+    display: none;
+    border: 1.5px solid #ffffff;
+    z-index: 10;
+  }
+  .sidebar ul li a i {
+    position: relative; /* nécessaire pour que .notification-dot soit positionné par rapport à l’icône */
+  }
+  
+  .notification-dot {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    width: 8px;
+    height: 8px;
+    background-color: red;
+    border-radius: 50%;
+    display: none;
+    border: 1.5px solid #ffffff;
+    z-index: 10;
+  }
+  
