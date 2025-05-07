@@ -134,14 +134,24 @@ document.addEventListener("DOMContentLoaded", function () {
     const cancelBtn = document.querySelector(".cancel-btn");
     const inputs = document.querySelectorAll(".input-box input");
 
-    function loadProfileData() {
-        inputs.forEach(input => {
-            const savedValue = localStorage.getItem(input.id);
-            if (savedValue) {
-                input.value = savedValue;
+  function loadProfileData() {
+    fetch('http://127.0.0.1:8000/teachers/')  // <-- Replace with your real backend API endpoint
+        .then(response => response.json())
+        .then(data => {
+            console.log(data);  // for testing
+            if (data.length > 0) {
+                const teacher = data[0];  // You can select by ID or use the first one
+
+                document.getElementById('nom').value = teacher.last_name;
+                document.getElementById('prenom').value = teacher.first_name;
+                document.getElementById('email').value = teacher.email;
+                document.getElementById('telephone').value = teacher.phone_number;
+                document.getElementById('departement').value = teacher.department;
+                document.getElementById('fonction').value = teacher.role;
             }
-        });
-    }
+        })
+        .catch(error => console.error('Erreur lors de la récupération des données:', error));
+}
 
     saveBtn.addEventListener("click", function () {
         inputs.forEach(input => {
