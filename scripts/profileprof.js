@@ -35,7 +35,21 @@ async function fetchUserProfile() {
 async function fetchCourseProgress() {
     try {
         const token = localStorage.getItem('token');
-        const response = await fetch('http://localhost:8000/courses/progress', {
+        // Get user ID from the token or user profile
+        const userResponse = await fetch('http://localhost:8000/users/me', {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        
+        if (!userResponse.ok) {
+            throw new Error('Failed to fetch user data');
+        }
+        
+        const userData = await userResponse.json();
+        
+        // Now fetch course progress with user ID
+        const response = await fetch(`http://localhost:8000/courses/progress/${userData.id}`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -80,6 +94,9 @@ async function fetchCourseProgress() {
         console.error('Error fetching course progress:', error);
     }
 }
+      
+
+    
 
 // Add this line at the end of your DOMContentLoaded event listener
 fetchUserProfile();
