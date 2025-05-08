@@ -1,10 +1,12 @@
 document.addEventListener("DOMContentLoaded", function () {
     // Sidebar toggle function
-    function toggleNav() {
-        let sidebar = document.getElementById("sidebar");
-        sidebar.style.left = sidebar.style.left === "0px" ? "-250px" : "0px";
-    }
+   // Define toggleNav function globally
+function toggleNav() {
+    let sidebar = document.getElementById("sidebar");
+    sidebar.style.left = sidebar.style.left === "0px" ? "-250px" : "0px";
+}
 
+document.addEventListener("DOMContentLoaded", function () {
     // Add event listeners for sidebar
     document.querySelector(".menu-icon").addEventListener("click", toggleNav);
     document.querySelector(".close-btn").addEventListener("click", toggleNav);
@@ -18,6 +20,12 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
+    // Rest of your code...
+    // (keep all the other functions and code the same)
+});
+
+    
+   
     // Fetch user profile data
     async function fetchUserProfile() {
         try {
