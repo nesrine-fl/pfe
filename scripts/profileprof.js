@@ -4,6 +4,86 @@
         let sidebar = document.getElementById("sidebar");
         sidebar.style.left = sidebar.style.left === "0px" ? "-250px" : "0px";
     }
+      // Add these functions to fetch data from backend
+async function fetchUserProfile() {
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('http://localhost:8000/users/me', {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to fetch user profile');
+        }
+
+        const userData = await response.json();
+        
+        // Update form fields with user data
+        document.getElementById('nom').value = userData.nom;
+        document.getElementById('prenom').value = userData.prenom;
+        document.getElementById('email').value = userData.email;
+        document.getElementById('telephone').value = userData.telephone;
+        document.getElementById('departement').value = userData.departement;
+        document.getElementById('fonction').value = userData.role;
+    } catch (error) {
+        console.error('Error fetching user profile:', error);
+    }
+}
+
+async function fetchCourseProgress() {
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('http://localhost:8000/courses/progress', {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch course progress');
+        }
+
+        const courseData = await response.json();
+        
+        // Update course table
+        const courseTableBody = document.getElementById("courseTableBody");
+        courseTableBody.innerHTML = "";
+        
+        courseData.forEach(course => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td>${course.title}</td>
+                <td>
+                    <div class="progress-bar">
+                        <span style="width: ${course.progress}%;"></span>
+                    </div>
+                    ${course.progress}%
+                </td>
+                <td>${new Date(course.start_date).toLocaleDateString()}</td>
+                <td>${course.end_date ? new Date(course.end_date).toLocaleDateString() : 'En cours'}</td>
+                <td>${course.completed ? "✅ Terminé" : "⌛ En cours"}</td>
+            `;
+            courseTableBody.appendChild(row);
+        });
+
+        // Update statistics
+        const completedCount = courseData.filter(course => course.completed).length;
+        const totalProgress = courseData.reduce((sum, course) => sum + course.progress, 0);
+        const avgProgress = courseData.length > 0 ? Math.round(totalProgress / courseData.length) : 0;
+
+        document.getElementById("totalCourses").textContent = courseData.length;
+        document.getElementById("completedCourses").textContent = completedCount;
+        document.getElementById("averageProgress").textContent = `${avgProgress}%`;
+    } catch (error) {
+        console.error('Error fetching course progress:', error);
+    }
+}
+
+// Add this line at the end of your DOMContentLoaded event listener
+fetchUserProfile();
+fetchCourseProgress();
 
     document.querySelector(".menu-icon").addEventListener("click", toggleNav);
     document.querySelector(".close-btn").addEventListener("click", toggleNav);
@@ -105,57 +185,35 @@
     });
 
     // Upload profile picture
-    uploadInput.addEventListener("change", function (event) {
-        const file = event.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                profilePic.src = e.target.result; // Update profile picture
-                localStorage.setItem("profileImage", e.target.result); // Save to local storage
+    // In your existing profile picture upload code, replace the FileReader part with:
+uploadInput.addEventListener("change", async function (event) {
+    const file = event.target.files[0];
+    if (file) {
+        const formData = new FormData();
+        formData.append('file', file);
 
-                // Also update enlarged image if overlay is open
-                const enlargedImg = document.querySelector("#imgOverlay img");
-                if (enlargedImg) {
-                    enlargedImg.src = e.target.result;
-                }
-            };
-            reader.readAsDataURL(file);
-        }
-    });
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch('http://localhost:8000/users/profile-picture', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                body: formData
+            });
 
-    // Load saved profile picture from local storage
-    const savedImage = localStorage.getItem("profileImage");
-    if (savedImage) {
-        profilePic.src = savedImage;
-    }
-
-    // Save and restore user details
-    const saveBtn = document.querySelector(".save-btn");
-    const cancelBtn = document.querySelector(".cancel-btn");
-    const inputs = document.querySelectorAll(".input-box input");
-
-    function loadProfileData() {
-        inputs.forEach(input => {
-            const savedValue = localStorage.getItem(input.id);
-            if (savedValue) {
-                input.value = savedValue;
+            if (!response.ok) {
+                throw new Error('Failed to upload profile picture');
             }
-        });
+
+            const data = await response.json();
+            profilePic.src = data.profile_picture_url;
+        } catch (error) {
+            console.error('Error uploading profile picture:', error);
+            alert('Failed to upload profile picture');
+        }
     }
-
-    saveBtn.addEventListener("click", function () {
-        inputs.forEach(input => {
-            localStorage.setItem(input.id, input.value);
-        });
-        alert("Informations enregistrées avec succès !");
-    });
-
-    cancelBtn.addEventListener("click", function () {
-        loadProfileData();
-        alert("Modifications annulées !");
-    });
-
-    loadProfileData();
+});
 
     // Toggle password visibility
     const togglePassword = document.querySelector(".toggle-password");
