@@ -1,9 +1,14 @@
 document.addEventListener("DOMContentLoaded", function () {
     // Sidebar toggle function
    // Define toggleNav function globally
+// Define toggleNav function globally
 function toggleNav() {
     let sidebar = document.getElementById("sidebar");
-    sidebar.style.left = sidebar.style.left === "0px" ? "-250px" : "0px";
+    if (sidebar.style.left === "0px") {
+        sidebar.style.left = "-250px";
+    } else {
+        sidebar.style.left = "0px";
+    }
 }
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -11,20 +16,74 @@ document.addEventListener("DOMContentLoaded", function () {
     document.querySelector(".menu-icon").addEventListener("click", toggleNav);
     document.querySelector(".close-btn").addEventListener("click", toggleNav);
 
-    // Close sidebar when clicking outside
-    document.addEventListener("click", function (event) {
-        const sidebar = document.getElementById("sidebar");
-        const menuIcon = document.querySelector(".menu-icon");
-        if (!sidebar.contains(event.target) && !menuIcon.contains(event.target)) {
-            sidebar.style.left = "-250px";
+    // Profile picture handling
+    const profilePic = document.getElementById("profilePic");
+    const uploadInput = document.getElementById("uploadProfilePic");
+    const changePicBtn = document.getElementById("changePicBtn");
+    const deletePicBtn = document.getElementById("deletePicBtn");
+
+    // Change picture button click
+    changePicBtn.addEventListener("click", function() {
+        uploadInput.click();
+    });
+
+    // Upload profile picture
+    uploadInput.addEventListener("change", async function (event) {
+        const file = event.target.files[0];
+        if (file) {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('http://localhost:8000/users/profile-picture', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to upload profile picture');
+                }
+
+                const data = await response.json();
+                profilePic.src = data.profile_picture_url;
+            } catch (error) {
+                console.error('Error uploading profile picture:', error);
+                alert('Failed to upload profile picture');
+            }
         }
     });
 
-    // Rest of your code...
-    // (keep all the other functions and code the same)
-});
+    // Delete profile picture
+    deletePicBtn.addEventListener("click", async function() {
+        const confirmDelete = confirm("Êtes-vous sûr de vouloir supprimer votre photo de profil ?");
+        if (confirmDelete) {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('http://localhost:8000/users/profile-picture', {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
 
-    
+                if (!response.ok) {
+                    throw new Error('Failed to delete profile picture');
+                }
+
+                profilePic.src = '../assets/images/profil-pic.png'; // Reset to default image
+            } catch (error) {
+                console.error('Error deleting profile picture:', error);
+                alert('Failed to delete profile picture');
+            }
+        }
+    });
+
+    // Rest of your existing code...
+});
    
     // Fetch user profile data
     async function fetchUserProfile() {
