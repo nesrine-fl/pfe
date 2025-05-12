@@ -125,25 +125,29 @@ document.addEventListener("DOMContentLoaded", function () {
     // Load saved profile picture from local storage
     async function fetchUserProfile() {
         try {
-            const response = await fetch("*http://127.0.0.1:8000/user/profile", {
-                method: "GET",
-                credentials: "include",
-            });
+            
+        const token = localStorage.getItem("access_token"); // Or however you saved it
 
-            if (!response.ok) throw new Error("Failed to fetch user");
+fetch("http://127.0.0.1:8000/users/me", {
+    method: "GET",
+    headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+    }
+})
+.then(response => {
+    if (!response.ok) {
+        throw new Error("Network response was not ok");
+    }
+    return response.json();
+})
+.then(data => {
+    console.log("User data:", data);
+})
+.catch(error => {
+    console.error("Error fetching user profile:", error);
+});
 
-            const userData = await response.json();
-
-            if (profilePic) {
-                profilePic.src = userData.profile_picture_url || defaultImage;
-            }
-
-            document.getElementById("username").value = userData.username || "";
-            document.getElementById("email").value = userData.email || "";
-            document.getElementById("password").value = "••••••"; // for display only
-        } catch (err) {
-            console.error("Error fetching user profile:", err);
-        }
     }
 
     fetchUserProfile();
