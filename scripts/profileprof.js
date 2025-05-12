@@ -104,6 +104,25 @@ document.addEventListener("DOMContentLoaded", function () {
             });
         });
     }
+    fetch("http://127.0.0.1:8000/users/me", {
+    method: "GET",
+    headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+    }
+})
+.then(response => {
+    if (!response.ok) {
+        throw new Error("Network response was not ok");
+    }
+    return response.json();
+})
+.then(data => {
+    console.log("User data:", data);
+})
+.catch(error => {
+    console.error("Error fetching user profile:", error);
+});
 
     // Upload profile picture
     if (uploadInput) {
@@ -129,33 +148,43 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Load saved profile picture from local storage
     async function fetchUserProfile() {
-        try {
-            
-        const token = localStorage.getItem("access_token"); // Or however you saved it
+    try {
+        const token = localStorage.getItem("access_token"); // Ensure the token is stored
+        if (!token) {
+            alert("User is not authenticated. Please log in.");
+            return;
+        }
 
-fetch("http://127.0.0.1:8000/users/me", {
-    method: "GET",
-    headers: {
-        "Authorization": `Bearer ${token}`,
-        "Content-Type": "application/json"
+        const response = await fetch("http://127.0.0.1:8000/users/me", {
+            method: "GET",
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json"
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error("Failed to fetch user profile. Please check the API.");
+        }
+
+        const data = await response.json();
+
+        // Populate input fields with user data
+        const inputs = document.querySelectorAll(".input-box input");
+        inputs.forEach(input => {
+            if (data[input.id]) {
+                input.value = data[input.id];
+            }
+        });
+
+        console.log("User profile data fetched successfully:", data);
+    } catch (error) {
+        console.error("Error fetching user profile:", error);
+        alert("Failed to load user profile. Please try again.");
     }
-})
-.then(response => {
-    if (!response.ok) {
-        throw new Error("Network response was not ok");
-    }
-    return response.json();
-})
-.then(data => {
-    console.log("User data:", data);
-})
-.catch(error => {
-    console.error("Error fetching user profile:", error);
-});
 
     }
 
-    fetchUserProfile();
 
     // Save and restore user details
     const saveBtn = document.querySelector(".save-btn");
