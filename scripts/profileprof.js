@@ -1,154 +1,261 @@
 document.addEventListener("DOMContentLoaded", function () {
-    // === Configuration ===
-    const BASE_URL = "http://localhost:8000";
-    const TOKEN = localStorage.getItem("token");
-
-    // === Sidebar Toggle ===
+    // Sidebar toggle function
     function toggleNav() {
-        const sidebar = document.getElementById("sidebar");
+        let sidebar = document.getElementById("sidebar");
         sidebar.style.left = sidebar.style.left === "0px" ? "-250px" : "0px";
     }
 
     document.querySelector(".menu-icon").addEventListener("click", toggleNav);
     document.querySelector(".close-btn").addEventListener("click", toggleNav);
 
-    // === Profile Picture Handling ===
+
+
+    // Profile picture handling
     const profilePic = document.getElementById("profilePic");
     const uploadInput = document.getElementById("uploadProfilePic");
     const changePicBtn = document.getElementById("changePicBtn");
     const deletePicBtn = document.getElementById("deletePicBtn");
+    const defaultImage = "./profil-pic.png"; // Default image path
 
-    changePicBtn.addEventListener("click", () => uploadInput.click());
+    // Function to open overlay with enlarged image
+    profilePic.addEventListener("click", function () {
+        // Remove existing overlay if it exists
+        const existingOverlay = document.getElementById("imgOverlay");
+        if (existingOverlay) {
+            existingOverlay.remove();
+        }
 
-    uploadInput.addEventListener("change", async function (event) {
+        // Create overlay
+        const overlay = document.createElement("div");
+        overlay.id = "imgOverlay";
+        overlay.style.position = "fixed";
+        overlay.style.top = "0";
+        overlay.style.left = "0";
+        overlay.style.width = "100vw";
+        overlay.style.height = "100vh";
+        overlay.style.background = "rgba(0, 0, 0, 0.7)";
+        overlay.style.display = "flex";
+        overlay.style.flexDirection = "column";
+        overlay.style.alignItems = "center";
+        overlay.style.justifyContent = "center";
+        overlay.style.zIndex = "1000";
+
+        // Create enlarged image
+        const enlargedImg = document.createElement("img");
+        enlargedImg.src = profilePic.src;
+        enlargedImg.style.width = "300px";
+        enlargedImg.style.height = "300px";
+        enlargedImg.style.borderRadius = "50%";
+        enlargedImg.style.border = "5px solid white";
+        enlargedImg.style.cursor = "pointer";
+
+        // Create button container
+        const btnContainer = document.createElement("div");
+        btnContainer.style.display = "flex";
+        btnContainer.style.gap = "10px";
+        btnContainer.style.marginTop = "10px";
+
+        // Create new buttons
+        const newChangePicBtn = document.createElement("button");
+        newChangePicBtn.textContent = "Modifier";
+        newChangePicBtn.style.backgroundColor = "#7c3aed";
+        newChangePicBtn.style.color = "white";
+        newChangePicBtn.style.padding = "10px 15px";
+        newChangePicBtn.style.border = "none";
+        newChangePicBtn.style.borderRadius = "5px";
+        newChangePicBtn.style.cursor = "pointer";
+        newChangePicBtn.addEventListener("click", function () {
+            uploadInput.click();
+        });
+
+        const newDeletePicBtn = document.createElement("button");
+        newDeletePicBtn.textContent = "Supprimer";
+        newDeletePicBtn.style.backgroundColor = "red";
+        newDeletePicBtn.style.color = "white";
+        newDeletePicBtn.style.padding = "10px 15px";
+        newDeletePicBtn.style.border = "none";
+        newDeletePicBtn.style.borderRadius = "5px";
+        newDeletePicBtn.style.cursor = "pointer";
+        newDeletePicBtn.addEventListener("click", function () {
+            const confirmDelete = confirm("Êtes-vous sûr de vouloir supprimer votre photo de profil ?");
+            if (confirmDelete) {
+                profilePic.src = defaultImage; // Reset profile image
+                enlargedImg.src = defaultImage; // Update enlarged image
+                localStorage.removeItem("profileImage"); // Remove from local storage
+                overlay.remove(); // Close overlay after deleting
+            }
+        });
+        
+
+        // Append buttons to the button container
+        btnContainer.appendChild(newChangePicBtn);
+        btnContainer.appendChild(newDeletePicBtn);
+
+        // Append everything to overlay
+        overlay.appendChild(enlargedImg);
+        overlay.appendChild(btnContainer);
+        document.body.appendChild(overlay);
+
+        // Close overlay when clicking outside
+        overlay.addEventListener("click", function (event) {
+            if (event.target === overlay) {
+                overlay.remove();
+            }
+        });
+    });
+
+    // Upload profile picture
+    uploadInput.addEventListener("change", function (event) {
         const file = event.target.files[0];
         if (file) {
-            const formData = new FormData();
-            formData.append("file", file);
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                profilePic.src = e.target.result; // Update profile picture
+                localStorage.setItem("profileImage", e.target.result); // Save to local storage
 
-            try {
-                const response = await fetch(`${BASE_URL}/users/profile-picture`, {
-                    method: "POST",
-                    headers: {
-                        Authorization: `Bearer ${TOKEN}`
-                    },
-                    body: formData
-                });
-
-                if (!response.ok) throw new Error("Upload failed");
-
-                const data = await response.json();
-                profilePic.src = data.profile_picture_url;
-            } catch (err) {
-                console.error(err);
-                alert("Failed to upload profile picture");
-            }
+                // Also update enlarged image if overlay is open
+                const enlargedImg = document.querySelector("#imgOverlay img");
+                if (enlargedImg) {
+                    enlargedImg.src = e.target.result;
+                }
+            };
+            reader.readAsDataURL(file);
         }
     });
 
-    deletePicBtn.addEventListener("click", async function () {
-        if (confirm("Êtes-vous sûr de vouloir supprimer votre photo de profil ?")) {
-            try {
-                const response = await fetch(`${BASE_URL}/users/profile-picture`, {
-                    method: "DELETE",
-                    headers: {
-                        Authorization: `Bearer ${TOKEN}`
-                    }
-                });
+    // Load saved profile picture from local storage
+ async function fetchUserProfile() {
+    try {
+        const response = await fetch("http://localhost:8000/users/me", {
+            method: "GET",
+            credentials: "include",
+        });
 
-                if (!response.ok) throw new Error("Deletion failed");
+        if (!response.ok) throw new Error("Failed to fetch user");
 
-                profilePic.src = "../assets/images/profil-pic.png";
-            } catch (err) {
-                console.error(err);
-                alert("Failed to delete profile picture");
+        const userData = await response.json();
+
+        // Update profile picture
+        if (userData.profile_picture_url) {
+            profilePic.src = userData.profile_picture_url;
+        } else {
+            profilePic.src = defaultImage;
+        }
+
+        // Update input fields with user data
+        document.getElementById("username").value = userData.username || "";
+        document.getElementById("email").value = userData.email || "";
+        document.getElementById("password").value = "••••••"; // for display only
+    } catch (err) {
+        console.error("Error fetching user profile:", err);
+    }
+}
+
+fetchUserProfile();
+
+
+    // Save and restore user details
+    const saveBtn = document.querySelector(".save-btn");
+    const cancelBtn = document.querySelector(".cancel-btn");
+    const inputs = document.querySelectorAll(".input-box input");
+
+    function loadProfileData() {
+        inputs.forEach(input => {
+            const savedValue = localStorage.getItem(input.id);
+            if (savedValue) {
+                input.value = savedValue;
             }
-        }
-    });
-
-    // === Fetch User Profile ===
-    async function fetchUserProfile() {
-        try {
-            const response = await fetch(`${BASE_URL}/users/me`, {
-                headers: {
-                    Authorization: `Bearer ${TOKEN}`,
-                    "Content-Type": "application/json",
-                    Accept: "application/json"
-                },
-                credentials: "include"
-            });
-
-            if (!response.ok) throw new Error("Profile fetch failed");
-
-            const user = await response.json();
-
-            document.getElementById("nom").value = user.nom;
-            document.getElementById("prenom").value = user.prenom;
-            document.getElementById("email").value = user.email;
-            document.getElementById("telephone").value = user.telephone;
-            document.getElementById("departement").value = user.departement;
-            document.getElementById("fonction").value = user.role;
-        } catch (err) {
-            console.error(err);
-        }
-    }
-
-    // === Fetch Course Progress ===
-    async function fetchCourseProgress() {
-        try {
-            const response = await fetch(`${BASE_URL}/courses/progress`, {
-                headers: {
-                    Authorization: `Bearer ${TOKEN}`,
-                    "Content-Type": "application/json",
-                    Accept: "application/json"
-                },
-                credentials: "include"
-            });
-
-            if (!response.ok) throw new Error("Progress fetch failed");
-
-            const courses = await response.json();
-            updateCourseTable(courses);
-            updateStatistics(courses);
-        } catch (err) {
-            console.error(err);
-        }
-    }
-
-    function updateCourseTable(courses) {
-        const tbody = document.getElementById("courseTableBody");
-        tbody.innerHTML = "";
-
-        courses.forEach(course => {
-            const row = document.createElement("tr");
-            row.innerHTML = `
-                <td>${course.title}</td>
-                <td>
-                    <div class="progress-bar">
-                        <span style="width: ${course.progress}%;"></span>
-                    </div>
-                    ${course.progress}%
-                </td>
-                <td>${new Date(course.start_date).toLocaleDateString()}</td>
-                <td>${course.end_date ? new Date(course.end_date).toLocaleDateString() : "En cours"}</td>
-                <td>${course.completed ? "✅ Terminé" : "⌛ En cours"}</td>
-            `;
-            tbody.appendChild(row);
         });
     }
 
-    function updateStatistics(courses) {
-        const completed = courses.filter(c => c.completed).length;
-        const avgProgress = courses.length
-            ? Math.round(courses.reduce((sum, c) => sum + c.progress, 0) / courses.length)
-            : 0;
+    saveBtn.addEventListener("click", function () {
+        inputs.forEach(input => {
+            localStorage.setItem(input.id, input.value);
+        });
+        alert("Informations enregistrées avec succès !");
+    });
 
-        document.getElementById("totalCourses").textContent = courses.length;
-        document.getElementById("completedCourses").textContent = completed;
-        document.getElementById("averageProgress").textContent = `${avgProgress}%`;
+    cancelBtn.addEventListener("click", function () {
+        loadProfileData();
+        alert("Modifications annulées !");
+    });
+
+    loadProfileData();
+
+    // Toggle password visibility
+    const togglePassword = document.querySelector(".toggle-password");
+    const passwordInput = document.getElementById("password");
+
+    if (togglePassword) {
+        togglePassword.addEventListener("click", function () {
+            passwordInput.type = passwordInput.type === "password" ? "text" : "password";
+        });
     }
+});
 
-    // === Init ===
-    fetchUserProfile();
-    fetchCourseProgress();
+
+
+
+document.addEventListener("DOMContentLoaded", function () {
+    const courseTableBody = document.getElementById("courseTableBody");
+    const skillsList = document.getElementById("skillsList");
+    const totalCourses = document.getElementById("totalCourses");
+    const completedCourses = document.getElementById("completedCourses");
+    const averageProgress = document.getElementById("averageProgress");
+
+    // Récupérer les cours stockés
+async function fetchCourseProgress() {
+    try {
+        const response = await fetch("http://localhost:8000/courses/progress", {
+            method: "GET",
+            credentials: "include",
+        });
+
+        if (!response.ok) throw new Error("Failed to fetch course progress");
+
+        const userCourses = await response.json();
+        renderCourses(userCourses);
+        renderSkills(userCourses);
+    } catch (err) {
+        console.error("Error fetching course progress:", err);
+    }
+}
+
+
+ function renderCourses(courses) {
+    courseTableBody.innerHTML = "";
+    let completedCount = 0;
+    let totalProgress = 0;
+
+    courses.forEach(course => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+            <td>${course.title}</td>
+            <td>
+                <div class="progress-bar">
+                    <span style="width: ${course.progress}%;"></span>
+                </div>
+                ${course.progress}%
+            </td>
+            <td>${course.startDate}</td>
+            <td>${course.endDate}</td>
+            <td>${course.completed ? "✅ Terminé" : "⌛ En cours"}</td>
+        `;
+        courseTableBody.appendChild(row);
+
+        if (course.completed) completedCount++;
+        totalProgress += course.progress;
+    });
+
+    totalCourses.textContent = courses.length;
+    completedCourses.textContent = completedCount;
+    averageProgress.textContent = courses.length > 0 ? Math.round(totalProgress / courses.length) + "%" : "0%";
+}
+
+
+ // Fermer la sidebar en cliquant en dehors
+ document.addEventListener("click", function (event) {
+    if (!sidebar.contains(event.target) && !toggleBtn.contains(event.target)) {
+        sidebar.classList.remove("active");
+    }
 });
