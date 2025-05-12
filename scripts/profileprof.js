@@ -1,150 +1,123 @@
 document.addEventListener("DOMContentLoaded", function () {
-    // Sidebar toggle function
-   // Define toggleNav function globally
-// Define toggleNav function globally
-function toggleNav() {
-    let sidebar = document.getElementById("sidebar");
-    if (sidebar.style.left === "0px") {
-        sidebar.style.left = "-250px";
-    } else {
-        sidebar.style.left = "0px";
-    }
-}
+    // === Configuration ===
+    const BASE_URL = "http://localhost:8000";
+    const TOKEN = localStorage.getItem("token");
 
-document.addEventListener("DOMContentLoaded", function () {
-    // Add event listeners for sidebar
+    // === Sidebar Toggle ===
+    function toggleNav() {
+        const sidebar = document.getElementById("sidebar");
+        sidebar.style.left = sidebar.style.left === "0px" ? "-250px" : "0px";
+    }
+
     document.querySelector(".menu-icon").addEventListener("click", toggleNav);
     document.querySelector(".close-btn").addEventListener("click", toggleNav);
 
-    // Profile picture handling
+    // === Profile Picture Handling ===
     const profilePic = document.getElementById("profilePic");
     const uploadInput = document.getElementById("uploadProfilePic");
     const changePicBtn = document.getElementById("changePicBtn");
     const deletePicBtn = document.getElementById("deletePicBtn");
 
-    // Change picture button click
-    changePicBtn.addEventListener("click", function() {
-        uploadInput.click();
-    });
+    changePicBtn.addEventListener("click", () => uploadInput.click());
 
-    // Upload profile picture
     uploadInput.addEventListener("change", async function (event) {
         const file = event.target.files[0];
         if (file) {
             const formData = new FormData();
-            formData.append('file', file);
+            formData.append("file", file);
 
             try {
-                const token = localStorage.getItem('token');
-                const response = await fetch('http://localhost:8000/users/profile-picture', {
-                    method: 'POST',
+                const response = await fetch(`${BASE_URL}/users/profile-picture`, {
+                    method: "POST",
                     headers: {
-                        'Authorization': `Bearer ${token}`
+                        Authorization: `Bearer ${TOKEN}`
                     },
                     body: formData
                 });
 
-                if (!response.ok) {
-                    throw new Error('Failed to upload profile picture');
-                }
+                if (!response.ok) throw new Error("Upload failed");
 
                 const data = await response.json();
                 profilePic.src = data.profile_picture_url;
-            } catch (error) {
-                console.error('Error uploading profile picture:', error);
-                alert('Failed to upload profile picture');
+            } catch (err) {
+                console.error(err);
+                alert("Failed to upload profile picture");
             }
         }
     });
 
-    // Delete profile picture
-    deletePicBtn.addEventListener("click", async function() {
-        const confirmDelete = confirm("Êtes-vous sûr de vouloir supprimer votre photo de profil ?");
-        if (confirmDelete) {
+    deletePicBtn.addEventListener("click", async function () {
+        if (confirm("Êtes-vous sûr de vouloir supprimer votre photo de profil ?")) {
             try {
-                const token = localStorage.getItem('token');
-                const response = await fetch('http://localhost:8000/users/profile-picture', {
-                    method: 'DELETE',
+                const response = await fetch(`${BASE_URL}/users/profile-picture`, {
+                    method: "DELETE",
                     headers: {
-                        'Authorization': `Bearer ${token}`
+                        Authorization: `Bearer ${TOKEN}`
                     }
                 });
 
-                if (!response.ok) {
-                    throw new Error('Failed to delete profile picture');
-                }
+                if (!response.ok) throw new Error("Deletion failed");
 
-                profilePic.src = '../assets/images/profil-pic.png'; // Reset to default image
-            } catch (error) {
-                console.error('Error deleting profile picture:', error);
-                alert('Failed to delete profile picture');
+                profilePic.src = "../assets/images/profil-pic.png";
+            } catch (err) {
+                console.error(err);
+                alert("Failed to delete profile picture");
             }
         }
     });
 
-    // Rest of your existing code...
-});
-   
-    // Fetch user profile data
+    // === Fetch User Profile ===
     async function fetchUserProfile() {
         try {
-            const token = localStorage.getItem('token');
-            const response = await fetch('http://localhost:8000/users/me', {
+            const response = await fetch(`${BASE_URL}/users/me`, {
                 headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
+                    Authorization: `Bearer ${TOKEN}`,
+                    "Content-Type": "application/json",
+                    Accept: "application/json"
                 },
-                credentials: 'include'
+                credentials: "include"
             });
-            
-            if (!response.ok) {
-                throw new Error('Failed to fetch user profile');
-            }
 
-            const userData = await response.json();
-            
-            // Update form fields with user data
-            document.getElementById('nom').value = userData.nom;
-            document.getElementById('prenom').value = userData.prenom;
-            document.getElementById('email').value = userData.email;
-            document.getElementById('telephone').value = userData.telephone;
-            document.getElementById('departement').value = userData.departement;
-            document.getElementById('fonction').value = userData.role;
-        } catch (error) {
-            console.error('Error fetching user profile:', error);
+            if (!response.ok) throw new Error("Profile fetch failed");
+
+            const user = await response.json();
+
+            document.getElementById("nom").value = user.nom;
+            document.getElementById("prenom").value = user.prenom;
+            document.getElementById("email").value = user.email;
+            document.getElementById("telephone").value = user.telephone;
+            document.getElementById("departement").value = user.departement;
+            document.getElementById("fonction").value = user.role;
+        } catch (err) {
+            console.error(err);
         }
     }
 
-    // Fetch course progress data
+    // === Fetch Course Progress ===
     async function fetchCourseProgress() {
         try {
-            const token = localStorage.getItem('token');
-            const response = await fetch('http://localhost:8000/courses/progress', {
+            const response = await fetch(`${BASE_URL}/courses/progress`, {
                 headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
+                    Authorization: `Bearer ${TOKEN}`,
+                    "Content-Type": "application/json",
+                    Accept: "application/json"
                 },
-                credentials: 'include'
+                credentials: "include"
             });
 
-            if (!response.ok) {
-                throw new Error('Failed to fetch course progress');
-            }
+            if (!response.ok) throw new Error("Progress fetch failed");
 
-            const courseData = await response.json();
-            updateCourseTable(courseData);
-            updateStatistics(courseData);
-        } catch (error) {
-            console.error('Error fetching course progress:', error);
+            const courses = await response.json();
+            updateCourseTable(courses);
+            updateStatistics(courses);
+        } catch (err) {
+            console.error(err);
         }
     }
 
-    // Update course table with fetched data
     function updateCourseTable(courses) {
-        const courseTableBody = document.getElementById("courseTableBody");
-        courseTableBody.innerHTML = "";
+        const tbody = document.getElementById("courseTableBody");
+        tbody.innerHTML = "";
 
         courses.forEach(course => {
             const row = document.createElement("tr");
@@ -157,37 +130,25 @@ document.addEventListener("DOMContentLoaded", function () {
                     ${course.progress}%
                 </td>
                 <td>${new Date(course.start_date).toLocaleDateString()}</td>
-                <td>${course.end_date ? new Date(course.end_date).toLocaleDateString() : 'En cours'}</td>
+                <td>${course.end_date ? new Date(course.end_date).toLocaleDateString() : "En cours"}</td>
                 <td>${course.completed ? "✅ Terminé" : "⌛ En cours"}</td>
             `;
-            courseTableBody.appendChild(row);
+            tbody.appendChild(row);
         });
     }
 
-    // Update statistics
     function updateStatistics(courses) {
-        const totalCourses = document.getElementById("totalCourses");
-        const completedCourses = document.getElementById("completedCourses");
-        const averageProgress = document.getElementById("averageProgress");
+        const completed = courses.filter(c => c.completed).length;
+        const avgProgress = courses.length
+            ? Math.round(courses.reduce((sum, c) => sum + c.progress, 0) / courses.length)
+            : 0;
 
-        const completedCount = courses.filter(course => course.completed).length;
-        const totalProgress = courses.reduce((sum, course) => sum + course.progress, 0);
-        const avgProgress = courses.length > 0 ? Math.round(totalProgress / courses.length) : 0;
-
-        totalCourses.textContent = courses.length;
-        completedCourses.textContent = completedCount;
-        averageProgress.textContent = `${avgProgress}%`;
+        document.getElementById("totalCourses").textContent = courses.length;
+        document.getElementById("completedCourses").textContent = completed;
+        document.getElementById("averageProgress").textContent = `${avgProgress}%`;
     }
 
-    // Profile picture handling
-    const profilePic = document.getElementById("profilePic");
-    const uploadInput = document.getElementById("uploadProfilePic");
-    const changePicBtn = document.getElementById("changePicBtn");
-    const deletePicBtn = document.getElementById("deletePicBtn");
-
-    // Your existing profile picture code here...
-
-    // Initialize data
+    // === Init ===
     fetchUserProfile();
     fetchCourseProgress();
 });
