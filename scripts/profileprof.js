@@ -104,7 +104,14 @@ document.addEventListener("DOMContentLoaded", function () {
             });
         });
     }
-    fetch("http://127.0.0.1:8000/users/me", {
+    // Ensure the token is retrieved from localStorage
+const token = localStorage.getItem("access_token");
+if (!token) {
+    alert("User is not authenticated. Please log in.");
+    return;
+}
+
+fetch("http://127.0.0.1:8000/users/me", {
     method: "GET",
     headers: {
         "Authorization": `Bearer ${token}`,
@@ -123,7 +130,7 @@ document.addEventListener("DOMContentLoaded", function () {
 .catch(error => {
     console.error("Error fetching user profile:", error);
 });
-
+  
     // Upload profile picture
     if (uploadInput) {
         uploadInput.addEventListener("change", function (event) {
