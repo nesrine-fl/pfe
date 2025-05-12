@@ -105,16 +105,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
     // Ensure the token is retrieved from localStorage
-const token = localStorage.getItem("access_token");
-if (!token) {
-    alert("User is not authenticated. Please log in.");
-    return;
-}
-const token = localStorage.getItem("access_token");
-if (!token) {
-    alert("User is not authenticated. Please log in.");
-    return;
-}
+
 
 fetch("http://127.0.0.1:8000/users/me", {
     method: "GET",
