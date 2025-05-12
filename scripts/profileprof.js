@@ -6,6 +6,11 @@ document.addEventListener("DOMContentLoaded", function () {
             sidebar.style.left = sidebar.style.left === "0px" ? "-250px" : "0px";
         }
     }
+    function toggleNav() {
+    const sidebar = document.getElementById('sidebar');
+    sidebar.classList.toggle('active');
+}
+
 
     const menuIcon = document.querySelector(".menu-icon");
     const closeBtn = document.querySelector(".close-btn");
