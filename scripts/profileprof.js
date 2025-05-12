@@ -1,4 +1,5 @@
 document.addEventListener("DOMContentLoaded", function () {
+    // Fetch the token from localStorage
     const token = localStorage.getItem("access_token");
     if (!token) {
         alert("Utilisateur non connecté.");
@@ -13,6 +14,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
+    // Menu icon and close button listeners
     const menuIcon = document.querySelector(".menu-icon");
     const closeBtn = document.querySelector(".close-btn");
 
