@@ -125,7 +125,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // Load saved profile picture from local storage
     async function fetchUserProfile() {
         try {
-            const response = await fetch("http://localhost:8000/users/me", {
+            const response = await fetch("*http://127.0.0.1:8000/user/profile", {
                 method: "GET",
                 credentials: "include",
             });
