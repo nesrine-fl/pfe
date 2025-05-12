@@ -8,8 +8,6 @@ document.addEventListener("DOMContentLoaded", function () {
     document.querySelector(".menu-icon").addEventListener("click", toggleNav);
     document.querySelector(".close-btn").addEventListener("click", toggleNav);
 
-
-
     // Profile picture handling
     const profilePic = document.getElementById("profilePic");
     const uploadInput = document.getElementById("uploadProfilePic");
@@ -85,7 +83,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 overlay.remove(); // Close overlay after deleting
             }
         });
-        
 
         // Append buttons to the button container
         btnContainer.appendChild(newChangePicBtn);
@@ -124,35 +121,34 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     // Load saved profile picture from local storage
- async function fetchUserProfile() {
-    try {
-        const response = await fetch("http://localhost:8000/users/me", {
-            method: "GET",
-            credentials: "include",
-        });
+    async function fetchUserProfile() {
+        try {
+            const response = await fetch("http://localhost:8000/users/me", {
+                method: "GET",
+                credentials: "include",
+            });
 
-        if (!response.ok) throw new Error("Failed to fetch user");
+            if (!response.ok) throw new Error("Failed to fetch user");
 
-        const userData = await response.json();
+            const userData = await response.json();
 
-        // Update profile picture
-        if (userData.profile_picture_url) {
-            profilePic.src = userData.profile_picture_url;
-        } else {
-            profilePic.src = defaultImage;
+            // Update profile picture
+            if (userData.profile_picture_url) {
+                profilePic.src = userData.profile_picture_url;
+            } else {
+                profilePic.src = defaultImage;
+            }
+
+            // Update input fields with user data
+            document.getElementById("username").value = userData.username || "";
+            document.getElementById("email").value = userData.email || "";
+            document.getElementById("password").value = "••••••"; // for display only
+        } catch (err) {
+            console.error("Error fetching user profile:", err);
         }
-
-        // Update input fields with user data
-        document.getElementById("username").value = userData.username || "";
-        document.getElementById("email").value = userData.email || "";
-        document.getElementById("password").value = "••••••"; // for display only
-    } catch (err) {
-        console.error("Error fetching user profile:", err);
     }
-}
 
-fetchUserProfile();
-
+    fetchUserProfile();
 
     // Save and restore user details
     const saveBtn = document.querySelector(".save-btn");
@@ -190,72 +186,5 @@ fetchUserProfile();
         togglePassword.addEventListener("click", function () {
             passwordInput.type = passwordInput.type === "password" ? "text" : "password";
         });
-    }
-});
-
-
-
-
-document.addEventListener("DOMContentLoaded", function () {
-    const courseTableBody = document.getElementById("courseTableBody");
-    const skillsList = document.getElementById("skillsList");
-    const totalCourses = document.getElementById("totalCourses");
-    const completedCourses = document.getElementById("completedCourses");
-    const averageProgress = document.getElementById("averageProgress");
-
-    // Récupérer les cours stockés
-async function fetchCourseProgress() {
-    try {
-        const response = await fetch("http://localhost:8000/courses/progress", {
-            method: "GET",
-            credentials: "include",
-        });
-
-        if (!response.ok) throw new Error("Failed to fetch course progress");
-
-        const userCourses = await response.json();
-        renderCourses(userCourses);
-        renderSkills(userCourses);
-    } catch (err) {
-        console.error("Error fetching course progress:", err);
-    }
-}
-
-
- function renderCourses(courses) {
-    courseTableBody.innerHTML = "";
-    let completedCount = 0;
-    let totalProgress = 0;
-
-    courses.forEach(course => {
-        const row = document.createElement("tr");
-        row.innerHTML = `
-            <td>${course.title}</td>
-            <td>
-                <div class="progress-bar">
-                    <span style="width: ${course.progress}%;"></span>
-                </div>
-                ${course.progress}%
-            </td>
-            <td>${course.startDate}</td>
-            <td>${course.endDate}</td>
-            <td>${course.completed ? "✅ Terminé" : "⌛ En cours"}</td>
-        `;
-        courseTableBody.appendChild(row);
-
-        if (course.completed) completedCount++;
-        totalProgress += course.progress;
-    });
-
-    totalCourses.textContent = courses.length;
-    completedCourses.textContent = completedCount;
-    averageProgress.textContent = courses.length > 0 ? Math.round(totalProgress / courses.length) + "%" : "0%";
-}
-
-
- // Fermer la sidebar en cliquant en dehors
- document.addEventListener("click", function (event) {
-    if (!sidebar.contains(event.target) && !toggleBtn.contains(event.target)) {
-        sidebar.classList.remove("active");
     }
 });
