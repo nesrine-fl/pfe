@@ -110,6 +110,11 @@ if (!token) {
     alert("User is not authenticated. Please log in.");
     return;
 }
+const token = localStorage.getItem("access_token");
+if (!token) {
+    alert("User is not authenticated. Please log in.");
+    return;
+}
 
 fetch("http://127.0.0.1:8000/users/me", {
     method: "GET",
@@ -119,18 +124,18 @@ fetch("http://127.0.0.1:8000/users/me", {
     }
 })
 .then(response => {
+    console.log("Fetch response status:", response.status);
     if (!response.ok) {
         throw new Error("Network response was not ok");
     }
     return response.json();
 })
 .then(data => {
-    console.log("User data:", data);
+    console.log("User data fetched successfully:", data);
 })
 .catch(error => {
     console.error("Error fetching user profile:", error);
 });
-  
     // Upload profile picture
     if (uploadInput) {
         uploadInput.addEventListener("change", function (event) {
