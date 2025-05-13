@@ -1,5 +1,4 @@
 document.addEventListener("DOMContentLoaded", function () {
-    // Fetch the token from localStorage
     const token = localStorage.getItem("access_token");
     if (!token) {
         alert("Utilisateur non connecté.");
@@ -14,7 +13,6 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    // Menu icon and close button listeners
     const menuIcon = document.querySelector(".menu-icon");
     const closeBtn = document.querySelector(".close-btn");
 
@@ -23,11 +21,11 @@ document.addEventListener("DOMContentLoaded", function () {
         closeBtn.addEventListener("click", toggleNav);
     }
 
-    // Profile picture logic
     const profilePic = document.getElementById("profilePic");
     const uploadInput = document.getElementById("uploadProfilePic");
     const defaultImage = "./profil-pic.png";
 
+    // Profile picture click to enlarge and show options
     if (profilePic) {
         profilePic.addEventListener("click", function () {
             const existingOverlay = document.getElementById("imgOverlay");
@@ -88,11 +86,20 @@ document.addEventListener("DOMContentLoaded", function () {
                 borderRadius: "5px",
                 cursor: "pointer"
             });
-            newDeletePicBtn.addEventListener("click", () => {
+            newDeletePicBtn.addEventListener("click", async () => {
                 if (confirm("Êtes-vous sûr de vouloir supprimer votre photo de profil ?")) {
                     profilePic.src = defaultImage;
                     enlargedImg.src = defaultImage;
-                    localStorage.removeItem("profileImage");
+
+                    await fetch("http://127.0.0.1:8000/users/me", {
+                        method: "PUT",
+                        headers: {
+                            "Authorization": `Bearer ${token}`,
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({ profile_image: null })
+                    });
+
                     overlay.remove();
                 }
             });
@@ -109,33 +116,42 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // Upload profile picture
+    // Upload profile picture and update backend
     if (uploadInput) {
-        uploadInput.addEventListener("change", function (event) {
+        uploadInput.addEventListener("change", async function (event) {
             const file = event.target.files[0];
             if (file) {
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    if (profilePic) {
-                        profilePic.src = e.target.result;
-                        localStorage.setItem("profileImage", e.target.result);
-                    }
+                const formData = new FormData();
+                formData.append("file", file);
 
+                const uploadResponse = await fetch("http://127.0.0.1:8000/upload/profile-pic", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Bearer ${token}`
+                    },
+                    body: formData
+                });
+
+                const result = await uploadResponse.json();
+                if (result.url) {
+                    profilePic.src = result.url;
                     const enlargedImg = document.querySelector("#imgOverlay img");
-                    if (enlargedImg) enlargedImg.src = e.target.result;
-                };
-                reader.readAsDataURL(file);
+                    if (enlargedImg) enlargedImg.src = result.url;
+
+                    await fetch("http://127.0.0.1:8000/users/me", {
+                        method: "PUT",
+                        headers: {
+                            "Authorization": `Bearer ${token}`,
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({ profile_image: result.url })
+                    });
+                }
             }
         });
     }
 
-    // Load saved profile picture
-    const savedProfileImage = localStorage.getItem("profileImage");
-    if (savedProfileImage && profilePic) {
-        profilePic.src = savedProfileImage;
-    }
-
-    // Fetch user data and fill form
+    // Fetch user data from backend
     async function fetchUserProfile() {
         try {
             const response = await fetch("http://127.0.0.1:8000/users/me", {
@@ -155,7 +171,10 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (data[input.id]) input.value = data[input.id];
             });
 
-            console.log("User data fetched:", data);
+            if (data.profile_image && profilePic) {
+                profilePic.src = data.profile_image;
+            }
+
         } catch (error) {
             console.error("Erreur profil utilisateur:", error);
             alert("Échec du chargement du profil.");
@@ -164,35 +183,37 @@ document.addEventListener("DOMContentLoaded", function () {
 
     fetchUserProfile();
 
-    // Save and cancel profile data
+    // Save profile changes to backend
     const saveBtn = document.querySelector(".save-btn");
     const cancelBtn = document.querySelector(".cancel-btn");
     const inputs = document.querySelectorAll(".input-box input");
 
-    function loadProfileData() {
-        inputs.forEach(input => {
-            const savedValue = localStorage.getItem(input.id);
-            if (savedValue) input.value = savedValue;
-        });
-    }
-
     if (saveBtn) {
-        saveBtn.addEventListener("click", function () {
+        saveBtn.addEventListener("click", async function () {
+            const updatedData = {};
             inputs.forEach(input => {
-                localStorage.setItem(input.id, input.value);
+                updatedData[input.id] = input.value;
             });
+
+            await fetch("http://127.0.0.1:8000/users/me", {
+                method: "PUT",
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(updatedData)
+            });
+
             alert("Informations enregistrées avec succès !");
         });
     }
 
     if (cancelBtn) {
         cancelBtn.addEventListener("click", function () {
-            loadProfileData();
+            fetchUserProfile();
             alert("Modifications annulées !");
         });
     }
-
-    loadProfileData();
 
     // Password visibility toggle
     const togglePassword = document.querySelector(".toggle-password");
