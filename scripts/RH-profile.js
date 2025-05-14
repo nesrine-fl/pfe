@@ -1,10 +1,11 @@
 // Global toggleNav function for HTML onclick
-function toggleSidebar() {
-  const sidebar = document.getElementById("sidebar");
-  sidebar.classList.toggle("active");
-}
+function toggleNav() {
+        let sidebar = document.getElementById("sidebar");
+        sidebar.style.left = sidebar.style.left === "0px" ? "-250px" : "0px";
+    }
 
-
+    document.querySelector(".menu-icon").addEventListener("click", toggleNav);
+    document.querySelector(".close-btn").addEventListener("click", toggleNav);
 
 // Backend URL - use the deployed version consistently
 const BACKEND_URL = "https://backend-m6sm.onrender.com";
