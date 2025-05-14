@@ -48,7 +48,7 @@ document.addEventListener("DOMContentLoaded", function () {
         console.log("Token expired");
         alert("Session expirée. Veuillez vous reconnecter.");
         // Redirect to login
-        window.location.href = "login.html"; // Adjust path as needed
+        window.location.href = "./log-in.html"; // Adjust path as needed
         return;
     }
 
@@ -82,7 +82,7 @@ async function initializeProfile(token) {
         
         if (error.message.includes("401")) {
             alert("Session invalide. Redirection vers la connexion...");
-            window.location.href = "login.html";
+            window.location.href = "./log-in.html";
             return;
         }
         
@@ -320,7 +320,7 @@ function setupFormButtons(token) {
                 
                 if (error.message.includes("401")) {
                     alert("Session expirée. Redirection vers la connexion...");
-                    window.location.href = "login.html";
+                    window.location.href = "./log-in.html";
                 } else {
                     alert("Erreur lors de la sauvegarde. Sauvegardé localement.");
                     // Save to localStorage as backup
