@@ -41,6 +41,21 @@ document.addEventListener("DOMContentLoaded", function () {
     // ======= BACKEND INTEGRATION =======
     initializeWithBackend(token);
 });
+// Add this to your profile page:
+setInterval(async () => {
+    const token = localStorage.getItem("token");
+    if (token) {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const expiry = new Date(payload.exp * 1000);
+        const now = new Date();
+        const minutesLeft = (expiry - now) / 1000 / 60;
+        
+        if (minutesLeft < 5) {
+            console.log("Token expires in", minutesLeft, "minutes - consider refreshing");
+            // Auto redirect to login or refresh token
+        }
+    }
+}, 5 * 60 * 1000); // Check every 5 minutes
 
 async function initializeWithBackend(token) {
     try {
