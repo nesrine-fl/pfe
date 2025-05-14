@@ -7,6 +7,78 @@ function toggleNav() {
 
 document.addEventListener("DOMContentLoaded", function () {
     console.log("Starting with backend integration...");
+    // Add this function right after the toggleNav function
+function debugTokenIssue() {
+    console.log("=== TOKEN DEBUG ===");
+    
+    // Check localStorage
+    const tokenKey1 = localStorage.getItem("token");
+    const tokenKey2 = localStorage.getItem("access_token");
+    
+    console.log("token key:", tokenKey1 ? `${tokenKey1.substring(0, 50)}...` : "NOT FOUND");
+    console.log("access_token key:", tokenKey2 ? `${tokenKey2.substring(0, 50)}...` : "NOT FOUND");
+    
+    const token = tokenKey1 || tokenKey2;
+    
+    if (token) {
+        try {
+            // Decode token
+            const parts = token.split('.');
+            console.log("Token parts count:", parts.length);
+            
+            if (parts.length !== 3) {
+                console.error("❌ Invalid JWT format");
+                return;
+            }
+            
+            const payload = JSON.parse(atob(parts[1]));
+            console.log("Token payload:", payload);
+            
+            const expiry = new Date(payload.exp * 1000);
+            const issued = new Date(payload.iat * 1000);
+            const now = new Date();
+            
+            console.log("Issued at:", issued);
+            console.log("Expires at:", expiry);
+            console.log("Current time:", now);
+            console.log("Time until expiry (minutes):", (expiry - now) / 1000 / 60);
+            console.log("Is expired?", now > expiry);
+            
+            // Test token with backend
+            console.log("Testing token with backend...");
+            fetch("http://127.0.0.1:8000/users/me", {
+                method: "GET",
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                }
+            })
+            .then(response => {
+                console.log("Backend response status:", response.status);
+                console.log("Backend response headers:", [...response.headers.entries()]);
+                
+                if (response.status === 401) {
+                    console.error("❌ Backend rejects token - need to login again");
+                } else if (response.ok) {
+                    console.log("✅ Token is valid on backend");
+                }
+            })
+            .catch(error => {
+                console.error("❌ Backend request failed:", error);
+            });
+            
+        } catch (e) {
+            console.error("❌ Error decoding token:", e);
+        }
+    } else {
+        console.error("❌ No token found in localStorage");
+    }
+    
+    console.log("=== END DEBUG ===");
+}
+
+// Call it immediately
+debugTokenIssue();
 
     // ======= SIDEBAR SETUP (Always works) =======
     const menuIcon = document.querySelector(".menu-icon");
@@ -37,6 +109,8 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     console.log("Token found, checking backend...");
+    console.log("Running token debug...");
+debugTokenIssue();
 
     // ======= BACKEND INTEGRATION =======
     initializeWithBackend(token);
