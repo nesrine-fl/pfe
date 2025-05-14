@@ -1,11 +1,16 @@
 // Global toggleNav function for HTML onclick
-function toggleNav() {
-        let sidebar = document.getElementById("sidebar");
-        sidebar.style.left = sidebar.style.left === "0px" ? "-250px" : "0px";
-    }
+document.addEventListener("DOMContentLoaded", function () {
+    const sidebar = document.getElementById("sidebar");
 
-    document.querySelector(".menu-icon").addEventListener("click", toggleNav);
-    document.querySelector(".close-btn").addEventListener("click", toggleNav);
+    // Fonction pour afficher/masquer la sidebar
+    window.toggleSidebar = function () {
+        sidebar.classList.toggle("active");
+    };
+
+
+    if (menuIcon) menuIcon.addEventListener("click", toggleSidebar);
+if (closeBtn) closeBtn.addEventListener("click", toggleSidebar);
+
 
 // Backend URL - use the deployed version consistently
 const BACKEND_URL = "https://backend-m6sm.onrender.com";
