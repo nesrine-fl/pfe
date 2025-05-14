@@ -151,28 +151,36 @@ function displayCourseStats(courses) {
 
 function displayCourseTable(courses) {
     const tbody = document.getElementById("courseTableBody");
-    console.log("Courses received:", courses);
+    tbody.innerHTML = "";
 
-    if (!tbody) {
-        console.error("❌ tbody element not found");
-        return;
-    }
+    courses.forEach(course => {
+        const title = course.title || course.nom_du_cours || "Cours sans nom";
 
-    if (!Array.isArray(courses)) {
-        console.error("❌ courses is not an array", courses);
-        return;
-    }
+        // Handle progress: remove % and convert to number
+        const progressString = course.progres || "0%";
+        const progress = parseFloat(progressString.replace('%', '')) || 0;
 
-    if (courses.length === 0) {
-        console.warn("⚠️ No courses to display.");
-        tbody.innerHTML = "<tr><td colspan='5'>Aucun cours trouvé</td></tr>";
-        return;
-    }
+        const startDate = course.startDate || course.date_debut || "N/A";
+        const endDate = course.endDate || course.date_fin || "En cours...";
 
-    tbody.innerHTML = "<tr><td colspan='5'>Rendering started...</td></tr>";
+        const completed = progress === 100;
+        const status = completed ? "✅ Terminé" : "📚 En cours";
 
-    courses.forEach((course, i) => {
-        console.log(`Course ${i}:`, course);
+        const row = document.createElement("tr");
+        row.innerHTML = `
+            <td>${title}</td>
+            <td>
+                <div style="width: 100%; background: #f0f0f0; border-radius: 10px; overflow: hidden;">
+                    <div style="width: ${progress}%; background: #4CAF50; height: 20px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px;">
+                        ${progress}%
+                    </div>
+                </div>
+            </td>
+            <td>${startDate}</td>
+            <td>${endDate}</td>
+            <td>${status}</td>
+        `;
+        tbody.appendChild(row);
     });
 }
 
