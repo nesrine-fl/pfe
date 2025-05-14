@@ -17,8 +17,9 @@ document.addEventListener("DOMContentLoaded", function () {
     const closeBtn = document.querySelector(".close-btn");
     const sidebar = document.getElementById("sidebar");
 
-    if (menuIcon) menuIcon.addEventListener("click", toggleNav);
-    if (closeBtn) closeBtn.addEventListener("click", toggleNav);
+ 
+    if (menuIcon) menuIcon.addEventListener("click", toggleSidebar);
+if (closeBtn) closeBtn.addEventListener("click", toggleSidebar);
 
     // Close sidebar on outside click
     document.addEventListener("click", function (event) {
