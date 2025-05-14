@@ -7,8 +7,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 
-    if (menuIcon) menuIcon.addEventListener("click", toggleSidebar);
-if (closeBtn) closeBtn.addEventListener("click", toggleSidebar);
+    
+    document.querySelector(".menu-icon").addEventListener("click", toggleNav);
+    document.querySelector(".close-btn").addEventListener("click", toggleNav);
 
 
 // Backend URL - use the deployed version consistently
