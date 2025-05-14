@@ -1,16 +1,8 @@
 document.addEventListener("DOMContentLoaded", function () {
-    const token = localStorage.getItem("access_token");
-    if (!token) {
-        alert("Utilisateur non connecté.");
-        return;
-    }
-
-    // Toggle Sidebar
+    // Sidebar toggle function - updated to work like the second example
     function toggleNav() {
-        const sidebar = document.getElementById('sidebar');
-        if (sidebar) {
-            sidebar.classList.toggle('active');
-        }
+        let sidebar = document.getElementById("sidebar");
+        sidebar.style.left = sidebar.style.left === "0px" ? "-250px" : "0px";
     }
 
     const menuIcon = document.querySelector(".menu-icon");
@@ -20,6 +12,14 @@ document.addEventListener("DOMContentLoaded", function () {
         menuIcon.addEventListener("click", toggleNav);
         closeBtn.addEventListener("click", toggleNav);
     }
+
+    // Close sidebar when clicking outside
+    const sidebar = document.getElementById("sidebar");
+    document.addEventListener("click", function (event) {
+        if (sidebar && !sidebar.contains(event.target) && !menuIcon.contains(event.target)) {
+            sidebar.style.left = "-250px";
+        }
+    });
 
     const profilePic = document.getElementById("profilePic");
     const uploadInput = document.getElementById("uploadProfilePic");
@@ -86,20 +86,11 @@ document.addEventListener("DOMContentLoaded", function () {
                 borderRadius: "5px",
                 cursor: "pointer"
             });
-            newDeletePicBtn.addEventListener("click", async () => {
+            newDeletePicBtn.addEventListener("click", () => {
                 if (confirm("Êtes-vous sûr de vouloir supprimer votre photo de profil ?")) {
                     profilePic.src = defaultImage;
                     enlargedImg.src = defaultImage;
-
-                    await fetch("http://127.0.0.1:8000/users/me", {
-                        method: "PUT",
-                        headers: {
-                            "Authorization": `Bearer ${token}`,
-                            "Content-Type": "application/json"
-                        },
-                        body: JSON.stringify({ profile_image: null })
-                    });
-
+                    localStorage.removeItem("profileImage");
                     overlay.remove();
                 }
             });
@@ -116,101 +107,58 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // Upload profile picture and update backend
+    // Upload profile picture - using localStorage instead of backend
     if (uploadInput) {
-        uploadInput.addEventListener("change", async function (event) {
+        uploadInput.addEventListener("change", function (event) {
             const file = event.target.files[0];
             if (file) {
-                const formData = new FormData();
-                formData.append("file", file);
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    profilePic.src = e.target.result;
+                    localStorage.setItem("profileImage", e.target.result);
 
-                const uploadResponse = await fetch("http://127.0.0.1:8000/upload/profile-pic", {
-                    method: "POST",
-                    headers: {
-                        "Authorization": `Bearer ${token}`
-                    },
-                    body: formData
-                });
-
-                const result = await uploadResponse.json();
-                if (result.url) {
-                    profilePic.src = result.url;
                     const enlargedImg = document.querySelector("#imgOverlay img");
-                    if (enlargedImg) enlargedImg.src = result.url;
-
-                    await fetch("http://127.0.0.1:8000/users/me", {
-                        method: "PUT",
-                        headers: {
-                            "Authorization": `Bearer ${token}`,
-                            "Content-Type": "application/json"
-                        },
-                        body: JSON.stringify({ profile_image: result.url })
-                    });
-                }
+                    if (enlargedImg) enlargedImg.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
             }
         });
     }
 
-    // Fetch user data from backend
-    async function fetchUserProfile() {
-        try {
-            const response = await fetch("http://127.0.0.1:8000/users/me", {
-                method: "GET",
-                headers: {
-                    "Authorization": `Bearer ${token}`,
-                    "Content-Type": "application/json"
-                }
-            });
-
-            if (!response.ok) throw new Error("Erreur API");
-
-            const data = await response.json();
-            const inputs = document.querySelectorAll(".input-box input");
-
-            inputs.forEach(input => {
-                if (data[input.id]) input.value = data[input.id];
-            });
-
-            if (data.profile_image && profilePic) {
-                profilePic.src = data.profile_image;
-            }
-
-        } catch (error) {
-            console.error("Erreur profil utilisateur:", error);
-            alert("Échec du chargement du profil.");
-        }
+    // Load saved profile picture from localStorage
+    const savedImage = localStorage.getItem("profileImage");
+    if (savedImage && profilePic) {
+        profilePic.src = savedImage;
     }
 
-    fetchUserProfile();
+    // Load user profile data from localStorage
+    function loadProfileData() {
+        const inputs = document.querySelectorAll(".input-box input");
+        inputs.forEach(input => {
+            const savedValue = localStorage.getItem(input.id);
+            if (savedValue) input.value = savedValue;
+        });
+    }
 
-    // Save profile changes to backend
+    loadProfileData();
+
+    // Save profile changes to localStorage
     const saveBtn = document.querySelector(".save-btn");
     const cancelBtn = document.querySelector(".cancel-btn");
-    const inputs = document.querySelectorAll(".input-box input");
 
     if (saveBtn) {
-        saveBtn.addEventListener("click", async function () {
-            const updatedData = {};
+        saveBtn.addEventListener("click", function () {
+            const inputs = document.querySelectorAll(".input-box input");
             inputs.forEach(input => {
-                updatedData[input.id] = input.value;
+                localStorage.setItem(input.id, input.value);
             });
-
-            await fetch("http://127.0.0.1:8000/users/me", {
-                method: "PUT",
-                headers: {
-                    "Authorization": `Bearer ${token}`,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(updatedData)
-            });
-
             alert("Informations enregistrées avec succès !");
         });
     }
 
     if (cancelBtn) {
         cancelBtn.addEventListener("click", function () {
-            fetchUserProfile();
+            loadProfileData();
             alert("Modifications annulées !");
         });
     }
@@ -224,4 +172,70 @@ document.addEventListener("DOMContentLoaded", function () {
             passwordInput.type = passwordInput.type === "password" ? "text" : "password";
         });
     }
+
+    // Course management functionality
+    const courseTableBody = document.getElementById("courseTableBody");
+    const skillsList = document.getElementById("skillsList");
+    const totalCourses = document.getElementById("totalCourses");
+    const completedCourses = document.getElementById("completedCourses");
+    const averageProgress = document.getElementById("averageProgress");
+
+    let userCourses = JSON.parse(localStorage.getItem("userCourses")) || [];
+
+    function loadCourses() {
+        if (!courseTableBody) return;
+        
+        courseTableBody.innerHTML = "";
+        let completedCount = 0;
+        let totalProgress = 0;
+
+        userCourses.forEach(course => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td>${course.title}</td>
+                <td>
+                    <div class="progress-bar">
+                        <span style="width: ${course.progress}%;"></span>
+                    </div>
+                    ${course.progress}%
+                </td>
+                <td>${course.startDate}</td>
+                <td>${course.endDate}</td>
+                <td>${course.completed ? "✅ Terminé" : "⌛ En cours"}</td>
+            `;
+            courseTableBody.appendChild(row);
+
+            if (course.completed) completedCount++;
+            totalProgress += course.progress;
+        });
+
+        if (totalCourses) totalCourses.textContent = userCourses.length;
+        if (completedCourses) completedCourses.textContent = completedCount;
+        if (averageProgress) {
+            averageProgress.textContent = userCourses.length > 0 ? 
+                Math.round(totalProgress / userCourses.length) + "%" : "0%";
+        }
+    }
+
+    function loadSkills() {
+        if (!skillsList) return;
+        
+        skillsList.innerHTML = "";
+        const allSkills = new Set();
+
+        userCourses.forEach(course => {
+            if (course.completed && course.skills) {
+                course.skills.forEach(skill => allSkills.add(skill));
+            }
+        });
+
+        allSkills.forEach(skill => {
+            const li = document.createElement("li");
+            li.textContent = skill;
+            skillsList.appendChild(li);
+        });
+    }
+
+    loadCourses();
+    loadSkills();
 });
