@@ -68,7 +68,7 @@ async function initializeWithBackend(token) {
         console.error("Backend integration failed:", error);
         
         if (error.message.includes("401")) {
-            alert("Session expirée. Redirection vers login...");
+            alert("Session expirée.mode offline activé");
             window.location.href = "./log-in.html";
         } else {
             alert("Erreur backend. Mode offline activé.");
