@@ -1,23 +1,21 @@
-document.addEventListener("DOMContentLoaded", function () {
-    // Sidebar setup first (always works)
-    function toggleNav() {
-        const sidebar = document.getElementById("sidebar");
-        if (!sidebar) return;
-        const currentLeft = sidebar.style.left || "-250px";
-        sidebar.style.left = currentLeft === "0px" ? "-250px" : "0px";
-    }
-
-    const menuIcon = document.querySelector(".menu-icon");
-    const closeBtn = document.querySelector(".close-btn");
+// Define toggleNav globally (outside DOMContentLoaded) so HTML onclick can access it
+function toggleNav() {
     const sidebar = document.getElementById("sidebar");
+    if (!sidebar) return;
+    const currentLeft = sidebar.style.left || "-250px";
+    sidebar.style.left = currentLeft === "0px" ? "-250px" : "0px";
+}
 
-    // Initialize sidebar
+document.addEventListener("DOMContentLoaded", function () {
+    const token = localStorage.getItem("access_token");
+    
+    // Initialize sidebar position
+    const sidebar = document.getElementById("sidebar");
     if (sidebar) sidebar.style.left = "-250px";
-    if (menuIcon) menuIcon.addEventListener("click", toggleNav);
-    if (closeBtn) closeBtn.addEventListener("click", toggleNav);
 
-    // Close sidebar on outside click
+    // Close sidebar when clicking outside
     document.addEventListener("click", function (event) {
+        const menuIcon = document.querySelector(".menu-icon");
         if (sidebar && menuIcon && 
             !sidebar.contains(event.target) && 
             !menuIcon.contains(event.target) &&
@@ -26,12 +24,8 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
-    // Get token (you have one)
-    const token = localStorage.getItem("access_token");
-    console.log("Token found:", token ? "Yes" : "No");
-
     if (!token) {
-        console.log("No token - user not logged in");
+        alert("Utilisateur non connecté.");
         return;
     }
 
@@ -173,7 +167,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // Fetch user profile (async - doesn't block)
+    // Fetch user profile
     async function fetchUserProfile() {
         try {
             const response = await fetch("http://127.0.0.1:8000/users/me", {
@@ -204,7 +198,6 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    // Load profile asynchronously (doesn't block DOM)
     fetchUserProfile();
 
     // Save user data
@@ -254,4 +247,5 @@ document.addEventListener("DOMContentLoaded", function () {
             passwordInput.type = passwordInput.type === "password" ? "text" : "password";
         });
     }
+});
 });
