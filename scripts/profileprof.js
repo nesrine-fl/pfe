@@ -1,10 +1,11 @@
 // Global toggleNav function for HTML onclick
- window.toggleSidebar = function () {
-    const sidebar = document.getElementById('sidebar');
-    if (sidebar) {
-        sidebar.classList.toggle('active');
-    }
-};
+document.addEventListener("DOMContentLoaded", function () {
+    const sidebar = document.getElementById("sidebar");
+
+    // Fonction pour afficher/masquer la sidebar
+    window.toggleSidebar = function () {
+        sidebar.classList.toggle("active");
+    };
 
 
 // Backend URL - use the deployed version consistently
