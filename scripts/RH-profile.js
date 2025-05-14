@@ -1,9 +1,12 @@
-
 // Global toggleNav function for HTML onclick
- function toggleSidebar() {
-  const sidebar = document.getElementById("sidebar");
-  sidebar.classList.toggle("active");
+function toggleNav() {
+    const sidebar = document.getElementById("sidebar");
+    const currentLeft = window.getComputedStyle(sidebar).left;
+   sidebar.classList.toggle("active");
+    sidebar.style.left = currentLeft === "0px" ? "-250px" : "0px";
 }
+
+
 
 
 // Backend URL - use the deployed version consistently
