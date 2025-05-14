@@ -1,3 +1,4 @@
+
 // Global toggleNav function
 function toggleNav() {
     let sidebar = document.getElementById("sidebar");
@@ -379,13 +380,13 @@ function setupFormButtons(token) {
             } catch (error) {
                 console.error("Save error:", error);
                 
-                if (error.message.includes("401")) {
-                    alert("Session expirée. Redirection...");
-                    window.location.href = "./log-in.html";
-                } else {
-                    alert("Erreur sauvegarde. Sauvegardé localement.");
-                    localStorage.setItem("userData", JSON.stringify(updatedData));
-                }
+              if (error.message.includes("401")) {
+    alert("Token expiré. Sauvegarde échouée.");
+    console.error("❌ Cannot save - token expired");
+} else {
+    alert("Erreur sauvegarde. Sauvegardé localement.");
+    localStorage.setItem("userData", JSON.stringify(updatedData));
+}
             }
         });
     }
