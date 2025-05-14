@@ -1,39 +1,22 @@
 document.addEventListener("DOMContentLoaded", function () {
-    const token = localStorage.getItem("access_token");
-    if (!token) {
-        alert("Utilisateur non connecté.");
-        return;
-    }
-
-    // Sidebar toggle function - Fixed version
+    // Sidebar setup first (always works)
     function toggleNav() {
         const sidebar = document.getElementById("sidebar");
         if (!sidebar) return;
-        
-        // Get current position or default to closed
         const currentLeft = sidebar.style.left || "-250px";
         sidebar.style.left = currentLeft === "0px" ? "-250px" : "0px";
     }
 
-    // Get sidebar elements with null checks
     const menuIcon = document.querySelector(".menu-icon");
     const closeBtn = document.querySelector(".close-btn");
     const sidebar = document.getElementById("sidebar");
 
-    // Initialize sidebar position
-    if (sidebar) {
-        sidebar.style.left = "-250px";
-    }
+    // Initialize sidebar
+    if (sidebar) sidebar.style.left = "-250px";
+    if (menuIcon) menuIcon.addEventListener("click", toggleNav);
+    if (closeBtn) closeBtn.addEventListener("click", toggleNav);
 
-    // Add event listeners with null checks
-    if (menuIcon) {
-        menuIcon.addEventListener("click", toggleNav);
-    }
-    if (closeBtn) {
-        closeBtn.addEventListener("click", toggleNav);
-    }
-
-    // Close sidebar when clicking outside
+    // Close sidebar on outside click
     document.addEventListener("click", function (event) {
         if (sidebar && menuIcon && 
             !sidebar.contains(event.target) && 
@@ -43,86 +26,102 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
+    // Get token (you have one)
+    const token = localStorage.getItem("access_token");
+    console.log("Token found:", token ? "Yes" : "No");
+
+    if (!token) {
+        console.log("No token - user not logged in");
+        return;
+    }
+
     // Profile picture handling
     const profilePic = document.getElementById("profilePic");
     const uploadInput = document.getElementById("uploadProfilePic");
     const defaultImage = "./profil-pic.png";
 
-    // Function to open overlay with enlarged image
     if (profilePic) {
         profilePic.addEventListener("click", function () {
             const existingOverlay = document.getElementById("imgOverlay");
-            if (existingOverlay) {
-                existingOverlay.remove();
-            }
+            if (existingOverlay) existingOverlay.remove();
 
             const overlay = document.createElement("div");
             overlay.id = "imgOverlay";
-            overlay.style.position = "fixed";
-            overlay.style.top = "0";
-            overlay.style.left = "0";
-            overlay.style.width = "100vw";
-            overlay.style.height = "100vh";
-            overlay.style.background = "rgba(0, 0, 0, 0.7)";
-            overlay.style.display = "flex";
-            overlay.style.flexDirection = "column";
-            overlay.style.alignItems = "center";
-            overlay.style.justifyContent = "center";
-            overlay.style.zIndex = "1000";
+            Object.assign(overlay.style, {
+                position: "fixed",
+                top: "0",
+                left: "0",
+                width: "100vw",
+                height: "100vh",
+                background: "rgba(0, 0, 0, 0.7)",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                zIndex: "1000"
+            });
 
             const enlargedImg = document.createElement("img");
             enlargedImg.src = profilePic.src;
-            enlargedImg.style.width = "300px";
-            enlargedImg.style.height = "300px";
-            enlargedImg.style.borderRadius = "50%";
-            enlargedImg.style.border = "5px solid white";
-            enlargedImg.style.cursor = "pointer";
+            Object.assign(enlargedImg.style, {
+                width: "300px",
+                height: "300px",
+                borderRadius: "50%",
+                border: "5px solid white",
+                cursor: "pointer"
+            });
 
             const btnContainer = document.createElement("div");
-            btnContainer.style.display = "flex";
-            btnContainer.style.gap = "10px";
-            btnContainer.style.marginTop = "10px";
+            Object.assign(btnContainer.style, {
+                display: "flex",
+                gap: "10px",
+                marginTop: "10px"
+            });
 
             const newChangePicBtn = document.createElement("button");
             newChangePicBtn.textContent = "Modifier";
-            newChangePicBtn.style.backgroundColor = "#7c3aed";
-            newChangePicBtn.style.color = "white";
-            newChangePicBtn.style.padding = "10px 15px";
-            newChangePicBtn.style.border = "none";
-            newChangePicBtn.style.borderRadius = "5px";
-            newChangePicBtn.style.cursor = "pointer";
-            newChangePicBtn.addEventListener("click", function () {
-                uploadInput.click();
+            Object.assign(newChangePicBtn.style, {
+                backgroundColor: "#7c3aed",
+                color: "white",
+                padding: "10px 15px",
+                border: "none",
+                borderRadius: "5px",
+                cursor: "pointer"
             });
+            newChangePicBtn.addEventListener("click", () => uploadInput.click());
 
             const newDeletePicBtn = document.createElement("button");
             newDeletePicBtn.textContent = "Supprimer";
-            newDeletePicBtn.style.backgroundColor = "red";
-            newDeletePicBtn.style.color = "white";
-            newDeletePicBtn.style.padding = "10px 15px";
-            newDeletePicBtn.style.border = "none";
-            newDeletePicBtn.style.borderRadius = "5px";
-            newDeletePicBtn.style.cursor = "pointer";
-            newDeletePicBtn.addEventListener("click", async function () {
-                const confirmDelete = confirm("Êtes-vous sûr de vouloir supprimer votre photo de profil ?");
-                if (confirmDelete) {
+            Object.assign(newDeletePicBtn.style, {
+                backgroundColor: "red",
+                color: "white",
+                padding: "10px 15px",
+                border: "none",
+                borderRadius: "5px",
+                cursor: "pointer"
+            });
+            newDeletePicBtn.addEventListener("click", async () => {
+                if (confirm("Êtes-vous sûr de vouloir supprimer votre photo de profil ?")) {
                     profilePic.src = defaultImage;
                     enlargedImg.src = defaultImage;
 
-                    // Delete profile image on backend
-                    await fetch("http://127.0.0.1:8000/users/me", {
-                        method: "PUT",
-                        headers: {
-                            "Authorization": `Bearer ${token}`,
-                            "Content-Type": "application/json"
-                        },
-                        body: JSON.stringify({ profile_image: null })
-                    });
+                    try {
+                        await fetch("http://127.0.0.1:8000/users/me", {
+                            method: "PUT",
+                            headers: {
+                                "Authorization": `Bearer ${token}`,
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({ profile_image: null })
+                        });
+                    } catch (error) {
+                        console.error("Delete profile pic error:", error);
+                    }
 
                     overlay.remove();
                 }
             });
-            
+
             btnContainer.appendChild(newChangePicBtn);
             btnContainer.appendChild(newDeletePicBtn);
             overlay.appendChild(enlargedImg);
@@ -130,14 +129,12 @@ document.addEventListener("DOMContentLoaded", function () {
             document.body.appendChild(overlay);
 
             overlay.addEventListener("click", function (event) {
-                if (event.target === overlay) {
-                    overlay.remove();
-                }
+                if (event.target === overlay) overlay.remove();
             });
         });
     }
 
-    // Upload profile picture to backend
+    // Upload profile picture
     if (uploadInput) {
         uploadInput.addEventListener("change", async function (event) {
             const file = event.target.files[0];
@@ -145,39 +142,38 @@ document.addEventListener("DOMContentLoaded", function () {
                 const formData = new FormData();
                 formData.append("file", file);
 
-                const uploadResponse = await fetch("http://127.0.0.1:8000/upload/profile-pic", {
-                    method: "POST",
-                    headers: {
-                        "Authorization": `Bearer ${token}`
-                    },
-                    body: formData
-                });
-
-                const result = await uploadResponse.json();
-                if (result.url) {
-                    profilePic.src = result.url;
-
-                    // Update enlarged image if overlay is open
-                    const enlargedImg = document.querySelector("#imgOverlay img");
-                    if (enlargedImg) {
-                        enlargedImg.src = result.url;
-                    }
-
-                    // Update profile on backend
-                    await fetch("http://127.0.0.1:8000/users/me", {
-                        method: "PUT",
+                try {
+                    const uploadResponse = await fetch("http://127.0.0.1:8000/upload/profile-pic", {
+                        method: "POST",
                         headers: {
-                            "Authorization": `Bearer ${token}`,
-                            "Content-Type": "application/json"
+                            "Authorization": `Bearer ${token}`
                         },
-                        body: JSON.stringify({ profile_image: result.url })
+                        body: formData
                     });
+
+                    const result = await uploadResponse.json();
+                    if (result.url) {
+                        profilePic.src = result.url;
+                        const enlargedImg = document.querySelector("#imgOverlay img");
+                        if (enlargedImg) enlargedImg.src = result.url;
+
+                        await fetch("http://127.0.0.1:8000/users/me", {
+                            method: "PUT",
+                            headers: {
+                                "Authorization": `Bearer ${token}`,
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({ profile_image: result.url })
+                        });
+                    }
+                } catch (error) {
+                    console.error("Upload error:", error);
                 }
             }
         });
     }
 
-    // Fetch user data from backend
+    // Fetch user profile (async - doesn't block)
     async function fetchUserProfile() {
         try {
             const response = await fetch("http://127.0.0.1:8000/users/me", {
@@ -188,7 +184,9 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
             });
 
-            if (!response.ok) throw new Error("Erreur API");
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
 
             const data = await response.json();
             const inputs = document.querySelectorAll(".input-box input");
@@ -202,35 +200,41 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
         } catch (error) {
-            console.error("Erreur profil utilisateur:", error);
-            alert("Échec du chargement du profil.");
+            console.error("Fetch profile error:", error);
         }
     }
 
+    // Load profile asynchronously (doesn't block DOM)
     fetchUserProfile();
 
-    // Save and restore user details to backend
+    // Save user data
     const saveBtn = document.querySelector(".save-btn");
     const cancelBtn = document.querySelector(".cancel-btn");
-    const inputs = document.querySelectorAll(".input-box input");
 
     if (saveBtn) {
         saveBtn.addEventListener("click", async function () {
+            const inputs = document.querySelectorAll(".input-box input");
             const updatedData = {};
+            
             inputs.forEach(input => {
                 updatedData[input.id] = input.value;
             });
 
-            await fetch("http://127.0.0.1:8000/users/me", {
-                method: "PUT",
-                headers: {
-                    "Authorization": `Bearer ${token}`,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(updatedData)
-            });
+            try {
+                await fetch("http://127.0.0.1:8000/users/me", {
+                    method: "PUT",
+                    headers: {
+                        "Authorization": `Bearer ${token}`,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(updatedData)
+                });
 
-            alert("Informations enregistrées avec succès !");
+                alert("Informations enregistrées avec succès !");
+            } catch (error) {
+                console.error("Save error:", error);
+                alert("Erreur lors de la sauvegarde");
+            }
         });
     }
 
@@ -241,7 +245,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // Toggle password visibility
+    // Password toggle
     const togglePassword = document.querySelector(".toggle-password");
     const passwordInput = document.getElementById("password");
 
@@ -249,72 +253,5 @@ document.addEventListener("DOMContentLoaded", function () {
         togglePassword.addEventListener("click", function () {
             passwordInput.type = passwordInput.type === "password" ? "text" : "password";
         });
-    }
-
-    // Course management - keeping localStorage for now
-    const courseTableBody = document.getElementById("courseTableBody");
-    const skillsList = document.getElementById("skillsList");
-    const totalCourses = document.getElementById("totalCourses");
-    const completedCourses = document.getElementById("completedCourses");
-    const averageProgress = document.getElementById("averageProgress");
-
-    if (courseTableBody) {
-        let userCourses = JSON.parse(localStorage.getItem("userCourses")) || [];
-
-        function loadCourses() {
-            courseTableBody.innerHTML = "";
-            let completedCount = 0;
-            let totalProgress = 0;
-
-            userCourses.forEach(course => {
-                const row = document.createElement("tr");
-
-                row.innerHTML = `
-                    <td>${course.title}</td>
-                    <td>
-                        <div class="progress-bar">
-                            <span style="width: ${course.progress}%;"></span>
-                        </div>
-                        ${course.progress}%
-                    </td>
-                    <td>${course.startDate}</td>
-                    <td>${course.endDate}</td>
-                    <td>${course.completed ? "✅ Terminé" : "⌛ En cours"}</td>
-                `;
-
-                courseTableBody.appendChild(row);
-
-                if (course.completed) completedCount++;
-                totalProgress += course.progress;
-            });
-
-            if (totalCourses) totalCourses.textContent = userCourses.length;
-            if (completedCourses) completedCourses.textContent = completedCount;
-            if (averageProgress) {
-                averageProgress.textContent = userCourses.length > 0 ? Math.round(totalProgress / userCourses.length) + "%" : "0%";
-            }
-        }
-
-        function loadSkills() {
-            if (!skillsList) return;
-            
-            skillsList.innerHTML = "";
-            const allSkills = new Set();
-
-            userCourses.forEach(course => {
-                if (course.completed && course.skills) {
-                    course.skills.forEach(skill => allSkills.add(skill));
-                }
-            });
-
-            allSkills.forEach(skill => {
-                const li = document.createElement("li");
-                li.textContent = skill;
-                skillsList.appendChild(li);
-            });
-        }
-
-        loadCourses();
-        loadSkills();
     }
 });
