@@ -50,7 +50,8 @@ async function initializeWithBackend(token) {
         console.log("Fetching user info...");
         const userInfo = await fetchUserInfo(token);
         console.log("User info received:", userInfo);
-        populateUserForm(userInfo);
+        populateUserForm(userInfo.profile);
+
 
         // ======= 2. GET USER COURSES =======
         console.log("Fetching user courses...");
