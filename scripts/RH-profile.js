@@ -4,10 +4,6 @@
         sidebar.style.left = sidebar.style.left === "0px" ? "-250px" : "0px";
     }
 
-    // Fonction pour afficher/masquer la sidebar
-    window.toggleSidebar = function () {
-        sidebar.classList.toggle("active");
-    };
 
 
     if (menuIcon) menuIcon.addEventListener("click", toggleSidebar);
