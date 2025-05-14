@@ -5,15 +5,24 @@ function toggleNav() {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-    // ======= SIDEBAR - FONCTIONNE TOUJOURS =======
+    console.log("Page loaded - NO TOKEN CHECKS");
+
+    // ======= SIDEBAR SETUP =======
     const menuIcon = document.querySelector(".menu-icon");
     const closeBtn = document.querySelector(".close-btn");
     const sidebar = document.getElementById("sidebar");
 
-    if (menuIcon) menuIcon.addEventListener("click", toggleNav);
-    if (closeBtn) closeBtn.addEventListener("click", toggleNav);
+    if (menuIcon) {
+        menuIcon.addEventListener("click", toggleNav);
+        console.log("Menu icon connected");
+    }
+    
+    if (closeBtn) {
+        closeBtn.addEventListener("click", toggleNav);
+        console.log("Close button connected");
+    }
 
-    // Close sidebar when clicking outside
+    // Close sidebar on outside click
     document.addEventListener("click", function (event) {
         if (sidebar && menuIcon && 
             !sidebar.contains(event.target) && 
@@ -23,102 +32,49 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
-    // ======= SKIP TOKEN CHECK - DIRECT ACCESS =======
-    console.log("Accès direct au profil (sans vérification token)");
+    // ======= PROFILE SETUP (NO BACKEND) =======
+    setupLocalProfile();
+    setupLocalCourses();
+    
+    console.log("Profile loaded in offline mode");
+});
 
-    // ======= LOAD PROFILE FROM LOCALSTORAGE =======
+function setupLocalProfile() {
+    // Load user data from localStorage
     const userData = localStorage.getItem("userData");
     if (userData) {
         try {
             const data = JSON.parse(userData);
             const inputs = document.querySelectorAll(".input-box input");
             
-            // Fill form with localStorage data
             inputs.forEach(input => {
-                const value = data[input.id] || data[input.name];
-                if (value) input.value = value;
+                if (data[input.id]) {
+                    input.value = data[input.id];
+                }
             });
-            
-            console.log("Profil chargé depuis localStorage");
         } catch (e) {
-            console.error("Erreur localStorage:", e);
+            console.error("Error loading user data:", e);
         }
     }
 
-    // ======= PROFILE PICTURE - BASIC VERSION =======
+    // Profile picture setup
     const profilePic = document.getElementById("profilePic");
     const uploadInput = document.getElementById("uploadProfilePic");
-    const defaultImage = "./profil-pic.png";
-
-    // Load saved image
+    
+    // Load saved profile image
     const savedImage = localStorage.getItem("profileImage");
     if (savedImage && profilePic) {
         profilePic.src = savedImage;
     }
 
-    // Click to enlarge
+    // Profile picture click handler
     if (profilePic) {
         profilePic.addEventListener("click", function () {
-            const overlay = document.createElement("div");
-            overlay.style.cssText = `
-                position: fixed; top: 0; left: 0;
-                width: 100vw; height: 100vh;
-                background: rgba(0, 0, 0, 0.7);
-                display: flex; flex-direction: column;
-                align-items: center; justify-content: center;
-                z-index: 1000;
-            `;
-
-            const enlargedImg = document.createElement("img");
-            enlargedImg.src = profilePic.src;
-            enlargedImg.style.cssText = `
-                width: 300px; height: 300px;
-                border-radius: 50%; border: 5px solid white;
-            `;
-
-            const btnContainer = document.createElement("div");
-            btnContainer.style.cssText = "display: flex; gap: 10px; margin-top: 10px;";
-
-            // Change button
-            const changeBtn = document.createElement("button");
-            changeBtn.textContent = "Modifier";
-            changeBtn.style.cssText = `
-                background: #7c3aed; color: white;
-                padding: 10px 15px; border: none;
-                border-radius: 5px; cursor: pointer;
-            `;
-            changeBtn.onclick = () => uploadInput.click();
-
-            // Delete button
-            const deleteBtn = document.createElement("button");
-            deleteBtn.textContent = "Supprimer";
-            deleteBtn.style.cssText = `
-                background: red; color: white;
-                padding: 10px 15px; border: none;
-                border-radius: 5px; cursor: pointer;
-            `;
-            deleteBtn.onclick = () => {
-                if (confirm("Supprimer la photo de profil ?")) {
-                    profilePic.src = defaultImage;
-                    enlargedImg.src = defaultImage;
-                    localStorage.removeItem("profileImage");
-                    overlay.remove();
-                }
-            };
-
-            btnContainer.appendChild(changeBtn);
-            btnContainer.appendChild(deleteBtn);
-            overlay.appendChild(enlargedImg);
-            overlay.appendChild(btnContainer);
-            document.body.appendChild(overlay);
-
-            overlay.onclick = (e) => {
-                if (e.target === overlay) overlay.remove();
-            };
+            showProfileImageOverlay(profilePic, uploadInput);
         });
     }
 
-    // Upload handler (localStorage only)
+    // Upload handler
     if (uploadInput) {
         uploadInput.addEventListener("change", function (event) {
             const file = event.target.files[0];
@@ -133,23 +89,21 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // ======= SAVE/CANCEL BUTTONS - LOCALSTORAGE ONLY =======
+    // Save/Cancel buttons
     const saveBtn = document.querySelector(".save-btn");
     const cancelBtn = document.querySelector(".cancel-btn");
 
     if (saveBtn) {
         saveBtn.addEventListener("click", function () {
             const inputs = document.querySelectorAll(".input-box input");
-            const updatedData = {};
+            const formData = {};
 
             inputs.forEach(input => {
-                updatedData[input.id] = input.value;
-                localStorage.setItem(input.id, input.value);
+                formData[input.id] = input.value;
             });
 
-            // Save complete userData
-            localStorage.setItem("userData", JSON.stringify(updatedData));
-            alert("Informations sauvegardées localement !");
+            localStorage.setItem("userData", JSON.stringify(formData));
+            alert("Données sauvegardées avec succès !");
         });
     }
 
@@ -160,7 +114,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // ======= PASSWORD TOGGLE =======
+    // Password toggle
     const togglePassword = document.querySelector(".toggle-password");
     const passwordInput = document.getElementById("password");
 
@@ -169,20 +123,85 @@ document.addEventListener("DOMContentLoaded", function () {
             passwordInput.type = passwordInput.type === "password" ? "text" : "password";
         });
     }
+}
 
-    // ======= LOAD COURSES FROM LOCALSTORAGE =======
-    const userCourses = JSON.parse(localStorage.getItem("userCourses") || "[]");
-    displayCourses(userCourses);
-});
+function showProfileImageOverlay(profilePic, uploadInput) {
+    // Remove existing overlay
+    const existingOverlay = document.getElementById("imgOverlay");
+    if (existingOverlay) existingOverlay.remove();
 
-function displayCourses(userCourses) {
+    // Create overlay
+    const overlay = document.createElement("div");
+    overlay.id = "imgOverlay";
+    overlay.style.cssText = `
+        position: fixed; top: 0; left: 0;
+        width: 100vw; height: 100vh;
+        background: rgba(0, 0, 0, 0.7);
+        display: flex; flex-direction: column;
+        align-items: center; justify-content: center;
+        z-index: 1000;
+    `;
+
+    // Create enlarged image
+    const enlargedImg = document.createElement("img");
+    enlargedImg.src = profilePic.src;
+    enlargedImg.style.cssText = `
+        width: 300px; height: 300px;
+        border-radius: 50%; border: 5px solid white;
+        cursor: pointer;
+    `;
+
+    // Create button container
+    const btnContainer = document.createElement("div");
+    btnContainer.style.cssText = "display: flex; gap: 10px; margin-top: 10px;";
+
+    // Change button
+    const changeBtn = document.createElement("button");
+    changeBtn.textContent = "Modifier";
+    changeBtn.style.cssText = `
+        background: #7c3aed; color: white;
+        padding: 10px 15px; border: none;
+        border-radius: 5px; cursor: pointer;
+    `;
+    changeBtn.onclick = () => uploadInput.click();
+
+    // Delete button
+    const deleteBtn = document.createElement("button");
+    deleteBtn.textContent = "Supprimer";
+    deleteBtn.style.cssText = `
+        background: red; color: white;
+        padding: 10px 15px; border: none;
+        border-radius: 5px; cursor: pointer;
+    `;
+    deleteBtn.onclick = () => {
+        if (confirm("Supprimer la photo de profil ?")) {
+            profilePic.src = "./profil-pic.png";
+            enlargedImg.src = "./profil-pic.png";
+            localStorage.removeItem("profileImage");
+            overlay.remove();
+        }
+    };
+
+    // Assemble overlay
+    btnContainer.appendChild(changeBtn);
+    btnContainer.appendChild(deleteBtn);
+    overlay.appendChild(enlargedImg);
+    overlay.appendChild(btnContainer);
+    document.body.appendChild(overlay);
+
+    // Click outside to close
+    overlay.onclick = (e) => {
+        if (e.target === overlay) overlay.remove();
+    };
+}
+
+function setupLocalCourses() {
     const courseTableBody = document.getElementById("courseTableBody");
-    const totalCourses = document.getElementById("totalCourses");
-    const completedCourses = document.getElementById("completedCourses");
-    const averageProgress = document.getElementById("averageProgress");
-
     if (!courseTableBody) return;
 
+    // Load courses from localStorage
+    const userCourses = JSON.parse(localStorage.getItem("userCourses") || "[]");
+    
     courseTableBody.innerHTML = "";
     let completedCount = 0;
     let totalProgress = 0;
@@ -197,8 +216,8 @@ function displayCourses(userCourses) {
                 </div>
                 ${course.progress || 0}%
             </td>
-            <td>${course.startDate || course.start_date || 'N/A'}</td>
-            <td>${course.endDate || course.end_date || 'En cours'}</td>
+            <td>${course.startDate || 'N/A'}</td>
+            <td>${course.endDate || 'En cours'}</td>
             <td>${course.completed ? "✅ Terminé" : "⌛ En cours"}</td>
         `;
         courseTableBody.appendChild(row);
@@ -206,6 +225,11 @@ function displayCourses(userCourses) {
         if (course.completed) completedCount++;
         totalProgress += (course.progress || 0);
     });
+
+    // Update statistics
+    const totalCourses = document.getElementById("totalCourses");
+    const completedCourses = document.getElementById("completedCourses");
+    const averageProgress = document.getElementById("averageProgress");
 
     if (totalCourses) totalCourses.textContent = userCourses.length;
     if (completedCourses) completedCourses.textContent = completedCount;
