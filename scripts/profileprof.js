@@ -56,8 +56,8 @@ async function initializeWithBackend(token) {
         // ======= 2. GET USER COURSES =======
         console.log("Fetching user courses...");
         displayCourseStats(userInfo.courses || []);
-displayCourseTable(userInfo.courses || []);
-displaySkills(userInfo.courses || []);
+       displayCourseTable(userInfo.courses || []);
+        displaySkills(userInfo.courses || []);
 
 
         // ======= 3. SETUP PROFILE FEATURES =======
