@@ -1,3 +1,4 @@
+document.addEventListener("DOMContentLoaded", function () {
 // Global toggleNav function for HTML onclick
    function toggleNav() {
         let sidebar = document.getElementById("sidebar");
