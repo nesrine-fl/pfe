@@ -5,22 +5,15 @@ function toggleNav() {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-    console.log("Page loaded - NO TOKEN CHECKS");
+    console.log("Starting with backend integration...");
 
-    // ======= SIDEBAR SETUP =======
+    // ======= SIDEBAR SETUP (Always works) =======
     const menuIcon = document.querySelector(".menu-icon");
     const closeBtn = document.querySelector(".close-btn");
     const sidebar = document.getElementById("sidebar");
 
-    if (menuIcon) {
-        menuIcon.addEventListener("click", toggleNav);
-        console.log("Menu icon connected");
-    }
-    
-    if (closeBtn) {
-        closeBtn.addEventListener("click", toggleNav);
-        console.log("Close button connected");
-    }
+    if (menuIcon) menuIcon.addEventListener("click", toggleNav);
+    if (closeBtn) closeBtn.addEventListener("click", toggleNav);
 
     // Close sidebar on outside click
     document.addEventListener("click", function (event) {
@@ -32,55 +25,231 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
-    // ======= PROFILE SETUP (NO BACKEND) =======
-    setupLocalProfile();
-    setupLocalCourses();
+    // ======= TOKEN CHECK =======
+    const token = localStorage.getItem("token") || localStorage.getItem("access_token");
     
-    console.log("Profile loaded in offline mode");
+    if (!token) {
+        console.log("No token found");
+        alert("Utilisateur non connecté. Redirection...");
+        window.location.href = "./log-in.html";
+        return;
+    }
+
+    console.log("Token found, checking backend...");
+
+    // ======= BACKEND INTEGRATION =======
+    initializeWithBackend(token);
 });
 
-function setupLocalProfile() {
-    // Load user data from localStorage
-    const userData = localStorage.getItem("userData");
-    if (userData) {
-        try {
-            const data = JSON.parse(userData);
-            const inputs = document.querySelectorAll(".input-box input");
-            
-            inputs.forEach(input => {
-                if (data[input.id]) {
-                    input.value = data[input.id];
-                }
-            });
-        } catch (e) {
-            console.error("Error loading user data:", e);
+async function initializeWithBackend(token) {
+    try {
+        // ======= 1. GET USER INFO =======
+        console.log("Fetching user info...");
+        const userInfo = await fetchUserInfo(token);
+        console.log("User info received:", userInfo);
+        populateUserForm(userInfo);
+
+        // ======= 2. GET USER PROGRESS =======
+        console.log("Fetching user progress...");
+        await fetchUserProgress(token);
+
+        // ======= 3. SETUP PROFILE FEATURES =======
+        setupProfileFeatures(token, userInfo);
+
+        // ======= 4. SETUP FORM BUTTONS =======
+        setupFormButtons(token);
+
+        // ======= 5. SETUP PASSWORD TOGGLE =======
+        setupPasswordToggle();
+
+        console.log("Backend integration complete!");
+
+    } catch (error) {
+        console.error("Backend integration failed:", error);
+        
+        if (error.message.includes("401")) {
+            alert("Session expirée. Redirection vers login...");
+            window.location.href = "./log-in.html";
+        } else {
+            alert("Erreur backend. Mode offline activé.");
+            loadFromLocalStorage();
         }
     }
+}
 
-    // Profile picture setup
+async function fetchUserInfo(token) {
+    console.log("Making API call to /users/me");
+    
+    const response = await fetch("http://127.0.0.1:8000/users/me", {
+        method: "GET",
+        headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+        }
+    });
+
+    console.log("User info response status:", response.status);
+
+    if (!response.ok) {
+        throw new Error(`Failed to fetch user info: ${response.status}`);
+    }
+
+    const userInfo = await response.json();
+    console.log("User info data:", userInfo);
+    return userInfo;
+}
+
+async function fetchUserProgress(token) {
+    try {
+        console.log("Making API call to /users/progress or /users/courses");
+        
+        // Try different possible endpoints
+        const endpoints = [
+            "/users/courses",
+            "/users/progress", 
+            "/courses",
+            "/user/courses"
+        ];
+
+        for (const endpoint of endpoints) {
+            try {
+                const response = await fetch(`http://127.0.0.1:8000${endpoint}`, {
+                    method: "GET",
+                    headers: {
+                        "Authorization": `Bearer ${token}`,
+                        "Content-Type": "application/json"
+                    }
+                });
+
+                console.log(`${endpoint} response status:`, response.status);
+
+                if (response.ok) {
+                    const courses = await response.json();
+                    console.log(`Courses from ${endpoint}:`, courses);
+                    displayCourses(courses);
+                    return courses;
+                }
+            } catch (error) {
+                console.log(`${endpoint} failed:`, error.message);
+                continue;
+            }
+        }
+
+        // If all endpoints fail, try localStorage
+        console.log("All course endpoints failed, using localStorage");
+        const localCourses = JSON.parse(localStorage.getItem("userCourses") || "[]");
+        displayCourses(localCourses);
+        
+    } catch (error) {
+        console.error("Error fetching user progress:", error);
+        // Fallback to localStorage
+        const localCourses = JSON.parse(localStorage.getItem("userCourses") || "[]");
+        displayCourses(localCourses);
+    }
+}
+
+function populateUserForm(userInfo) {
+    console.log("Populating form with user data");
+    
+    const inputs = document.querySelectorAll(".input-box input");
+    
+    // Map common field names
+    const fieldMapping = {
+        'nom': ['nom', 'lastname', 'last_name'],
+        'prenom': ['prenom', 'firstname', 'first_name'],
+        'email': ['email'],
+        'telephone': ['telephone', 'phone'],
+        'departement': ['departement', 'department'],
+        'fonction': ['fonction', 'function', 'role']
+    };
+
+    inputs.forEach(input => {
+        const inputId = input.id;
+        
+        // Direct match
+        if (userInfo[inputId]) {
+            input.value = userInfo[inputId];
+            return;
+        }
+
+        // Try mapped fields
+        if (fieldMapping[inputId]) {
+            for (const field of fieldMapping[inputId]) {
+                if (userInfo[field]) {
+                    input.value = userInfo[field];
+                    break;
+                }
+            }
+        }
+    });
+
+    // Load profile image
+    const profilePic = document.getElementById("profilePic");
+    if (userInfo.profile_image && profilePic) {
+        profilePic.src = userInfo.profile_image;
+        console.log("Profile image loaded:", userInfo.profile_image);
+    }
+}
+
+function setupProfileFeatures(token, userInfo) {
     const profilePic = document.getElementById("profilePic");
     const uploadInput = document.getElementById("uploadProfilePic");
-    
-    // Load saved profile image
-    const savedImage = localStorage.getItem("profileImage");
-    if (savedImage && profilePic) {
-        profilePic.src = savedImage;
-    }
+    const defaultImage = "./profil-pic.png";
 
-    // Profile picture click handler
-    if (profilePic) {
-        profilePic.addEventListener("click", function () {
-            showProfileImageOverlay(profilePic, uploadInput);
-        });
-    }
+    if (!profilePic) return;
 
-    // Upload handler
+    // Click handler
+    profilePic.addEventListener("click", function () {
+        showProfileOverlay(profilePic, uploadInput, token);
+    });
+
+    // Upload handler with backend
     if (uploadInput) {
-        uploadInput.addEventListener("change", function (event) {
+        uploadInput.addEventListener("change", async function (event) {
             const file = event.target.files[0];
-            if (file) {
+            if (!file) return;
+
+            console.log("Uploading profile picture...");
+
+            const formData = new FormData();
+            formData.append("file", file);
+
+            try {
+                const uploadResponse = await fetch("http://127.0.0.1:8000/upload/profile-pic", {
+                    method: "POST",
+                    headers: { "Authorization": `Bearer ${token}` },
+                    body: formData
+                });
+
+                console.log("Upload response status:", uploadResponse.status);
+
+                if (!uploadResponse.ok) {
+                    throw new Error(`Upload failed: ${uploadResponse.status}`);
+                }
+
+                const result = await uploadResponse.json();
+                console.log("Upload result:", result);
+
+                if (result.url) {
+                    profilePic.src = result.url;
+
+                    // Update enlarged image if overlay is open
+                    const enlargedImg = document.querySelector("#imgOverlay img");
+                    if (enlargedImg) enlargedImg.src = result.url;
+
+                    // Update user profile
+                    console.log("Updating user profile with new image...");
+                    await updateUserProfile(token, { profile_image: result.url });
+                    
+                    console.log("Profile picture updated successfully!");
+                }
+            } catch (error) {
+                console.error("Upload error:", error);
+                alert("Erreur upload. Mode local activé.");
+                
+                // Fallback to localStorage
                 const reader = new FileReader();
-                reader.onload = function (e) {
+                reader.onload = e => {
                     profilePic.src = e.target.result;
                     localStorage.setItem("profileImage", e.target.result);
                 };
@@ -88,49 +257,12 @@ function setupLocalProfile() {
             }
         });
     }
-
-    // Save/Cancel buttons
-    const saveBtn = document.querySelector(".save-btn");
-    const cancelBtn = document.querySelector(".cancel-btn");
-
-    if (saveBtn) {
-        saveBtn.addEventListener("click", function () {
-            const inputs = document.querySelectorAll(".input-box input");
-            const formData = {};
-
-            inputs.forEach(input => {
-                formData[input.id] = input.value;
-            });
-
-            localStorage.setItem("userData", JSON.stringify(formData));
-            alert("Données sauvegardées avec succès !");
-        });
-    }
-
-    if (cancelBtn) {
-        cancelBtn.addEventListener("click", function () {
-            location.reload();
-            alert("Modifications annulées !");
-        });
-    }
-
-    // Password toggle
-    const togglePassword = document.querySelector(".toggle-password");
-    const passwordInput = document.getElementById("password");
-
-    if (togglePassword && passwordInput) {
-        togglePassword.addEventListener("click", function () {
-            passwordInput.type = passwordInput.type === "password" ? "text" : "password";
-        });
-    }
 }
 
-function showProfileImageOverlay(profilePic, uploadInput) {
-    // Remove existing overlay
+function showProfileOverlay(profilePic, uploadInput, token) {
     const existingOverlay = document.getElementById("imgOverlay");
     if (existingOverlay) existingOverlay.remove();
 
-    // Create overlay
     const overlay = document.createElement("div");
     overlay.id = "imgOverlay";
     overlay.style.cssText = `
@@ -142,7 +274,6 @@ function showProfileImageOverlay(profilePic, uploadInput) {
         z-index: 1000;
     `;
 
-    // Create enlarged image
     const enlargedImg = document.createElement("img");
     enlargedImg.src = profilePic.src;
     enlargedImg.style.cssText = `
@@ -151,7 +282,6 @@ function showProfileImageOverlay(profilePic, uploadInput) {
         cursor: pointer;
     `;
 
-    // Create button container
     const btnContainer = document.createElement("div");
     btnContainer.style.cssText = "display: flex; gap: 10px; margin-top: 10px;";
 
@@ -173,51 +303,144 @@ function showProfileImageOverlay(profilePic, uploadInput) {
         padding: 10px 15px; border: none;
         border-radius: 5px; cursor: pointer;
     `;
-    deleteBtn.onclick = () => {
+    deleteBtn.onclick = async () => {
         if (confirm("Supprimer la photo de profil ?")) {
             profilePic.src = "./profil-pic.png";
             enlargedImg.src = "./profil-pic.png";
-            localStorage.removeItem("profileImage");
+
+            try {
+                console.log("Deleting profile picture...");
+                await updateUserProfile(token, { profile_image: null });
+                console.log("Profile picture deleted successfully!");
+            } catch (error) {
+                console.error("Delete error:", error);
+            }
+
             overlay.remove();
         }
     };
 
-    // Assemble overlay
     btnContainer.appendChild(changeBtn);
     btnContainer.appendChild(deleteBtn);
     overlay.appendChild(enlargedImg);
     overlay.appendChild(btnContainer);
     document.body.appendChild(overlay);
 
-    // Click outside to close
     overlay.onclick = (e) => {
         if (e.target === overlay) overlay.remove();
     };
 }
 
-function setupLocalCourses() {
+async function updateUserProfile(token, updates) {
+    console.log("Updating user profile:", updates);
+    
+    const response = await fetch("http://127.0.0.1:8000/users/me", {
+        method: "PUT",
+        headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(updates)
+    });
+
+    console.log("Update response status:", response.status);
+
+    if (!response.ok) {
+        throw new Error(`Update failed: ${response.status}`);
+    }
+
+    const result = await response.json();
+    console.log("Update result:", result);
+    return result;
+}
+
+function setupFormButtons(token) {
+    const saveBtn = document.querySelector(".save-btn");
+    const cancelBtn = document.querySelector(".cancel-btn");
+
+    if (saveBtn) {
+        saveBtn.addEventListener("click", async function () {
+            console.log("Saving form data...");
+            
+            const inputs = document.querySelectorAll(".input-box input");
+            const updatedData = {};
+
+            inputs.forEach(input => {
+                updatedData[input.id] = input.value;
+            });
+
+            try {
+                await updateUserProfile(token, updatedData);
+                alert("Informations sauvegardées avec succès !");
+                
+                // Backup to localStorage
+                localStorage.setItem("userData", JSON.stringify(updatedData));
+                
+            } catch (error) {
+                console.error("Save error:", error);
+                
+                if (error.message.includes("401")) {
+                    alert("Session expirée. Redirection...");
+                    window.location.href = "./log-in.html";
+                } else {
+                    alert("Erreur sauvegarde. Sauvegardé localement.");
+                    localStorage.setItem("userData", JSON.stringify(updatedData));
+                }
+            }
+        });
+    }
+
+    if (cancelBtn) {
+        cancelBtn.addEventListener("click", async function () {
+            try {
+                const userInfo = await fetchUserInfo(token);
+                populateUserForm(userInfo);
+                alert("Modifications annulées !");
+            } catch (error) {
+                console.error("Cancel error:", error);
+                location.reload();
+            }
+        });
+    }
+}
+
+function setupPasswordToggle() {
+    const togglePassword = document.querySelector(".toggle-password");
+    const passwordInput = document.getElementById("password");
+
+    if (togglePassword && passwordInput) {
+        togglePassword.addEventListener("click", function () {
+            passwordInput.type = passwordInput.type === "password" ? "text" : "password";
+        });
+    }
+}
+
+function displayCourses(courses) {
     const courseTableBody = document.getElementById("courseTableBody");
+    const totalCourses = document.getElementById("totalCourses");
+    const completedCourses = document.getElementById("completedCourses");
+    const averageProgress = document.getElementById("averageProgress");
+
     if (!courseTableBody) return;
 
-    // Load courses from localStorage
-    const userCourses = JSON.parse(localStorage.getItem("userCourses") || "[]");
-    
+    console.log("Displaying courses:", courses);
+
     courseTableBody.innerHTML = "";
     let completedCount = 0;
     let totalProgress = 0;
 
-    userCourses.forEach(course => {
+    courses.forEach(course => {
         const row = document.createElement("tr");
         row.innerHTML = `
-            <td>${course.title || 'Cours sans titre'}</td>
+            <td>${course.title || course.name || 'Cours sans titre'}</td>
             <td>
                 <div class="progress-bar">
                     <span style="width: ${course.progress || 0}%;"></span>
                 </div>
                 ${course.progress || 0}%
             </td>
-            <td>${course.startDate || 'N/A'}</td>
-            <td>${course.endDate || 'En cours'}</td>
+            <td>${course.startDate || course.start_date || 'N/A'}</td>
+            <td>${course.endDate || course.end_date || 'En cours'}</td>
             <td>${course.completed ? "✅ Terminé" : "⌛ En cours"}</td>
         `;
         courseTableBody.appendChild(row);
@@ -227,14 +450,36 @@ function setupLocalCourses() {
     });
 
     // Update statistics
-    const totalCourses = document.getElementById("totalCourses");
-    const completedCourses = document.getElementById("completedCourses");
-    const averageProgress = document.getElementById("averageProgress");
-
-    if (totalCourses) totalCourses.textContent = userCourses.length;
+    if (totalCourses) totalCourses.textContent = courses.length;
     if (completedCourses) completedCourses.textContent = completedCount;
     if (averageProgress) {
-        averageProgress.textContent = userCourses.length > 0 ? 
-            Math.round(totalProgress / userCourses.length) + "%" : "0%";
+        averageProgress.textContent = courses.length > 0 ? 
+            Math.round(totalProgress / courses.length) + "%" : "0%";
+    }
+}
+
+function loadFromLocalStorage() {
+    console.log("Loading from localStorage as fallback");
+    
+    // Load user data
+    const userData = localStorage.getItem("userData");
+    if (userData) {
+        try {
+            const data = JSON.parse(userData);
+            populateUserForm(data);
+        } catch (e) {
+            console.error("Error parsing userData:", e);
+        }
+    }
+
+    // Load courses
+    const courses = JSON.parse(localStorage.getItem("userCourses") || "[]");
+    displayCourses(courses);
+
+    // Load profile image
+    const profilePic = document.getElementById("profilePic");
+    const savedImage = localStorage.getItem("profileImage");
+    if (savedImage && profilePic) {
+        profilePic.src = savedImage;
     }
 }
