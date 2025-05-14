@@ -22,6 +22,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const menuIcon = document.querySelector(".menu-icon");
     const closeBtn = document.querySelector(".close-btn");
     const sidebar = document.getElementById("sidebar");
+   });
 
  
     if (menuIcon) menuIcon.addEventListener("click", toggleSidebar);
