@@ -1,17 +1,13 @@
-
 // Global toggleNav function
 function toggleNav() {
     let sidebar = document.getElementById("sidebar");
     sidebar.style.left = sidebar.style.left === "0px" ? "-250px" : "0px";
 }
 
-document.addEventListener("DOMContentLoaded", function () {
-    console.log("Starting with backend integration...");
-    // Add this function right after the toggleNav function
+// Debug function (moved to global scope)
 function debugTokenIssue() {
     console.log("=== TOKEN DEBUG ===");
     
-    // Check localStorage
     const tokenKey1 = localStorage.getItem("token");
     const tokenKey2 = localStorage.getItem("access_token");
     
@@ -22,7 +18,6 @@ function debugTokenIssue() {
     
     if (token) {
         try {
-            // Decode token
             const parts = token.split('.');
             console.log("Token parts count:", parts.length);
             
@@ -35,37 +30,12 @@ function debugTokenIssue() {
             console.log("Token payload:", payload);
             
             const expiry = new Date(payload.exp * 1000);
-            const issued = new Date(payload.iat * 1000);
             const now = new Date();
             
-            console.log("Issued at:", issued);
             console.log("Expires at:", expiry);
             console.log("Current time:", now);
             console.log("Time until expiry (minutes):", (expiry - now) / 1000 / 60);
             console.log("Is expired?", now > expiry);
-            
-            // Test token with backend
-            console.log("Testing token with backend...");
-            fetch("http://127.0.0.1:8000/users/me", {
-                method: "GET",
-                headers: {
-                    "Authorization": `Bearer ${token}`,
-                    "Content-Type": "application/json"
-                }
-            })
-            .then(response => {
-                console.log("Backend response status:", response.status);
-                console.log("Backend response headers:", [...response.headers.entries()]);
-                
-                if (response.status === 401) {
-                    console.error("❌ Backend rejects token - need to login again");
-                } else if (response.ok) {
-                    console.log("✅ Token is valid on backend");
-                }
-            })
-            .catch(error => {
-                console.error("❌ Backend request failed:", error);
-            });
             
         } catch (e) {
             console.error("❌ Error decoding token:", e);
@@ -77,8 +47,11 @@ function debugTokenIssue() {
     console.log("=== END DEBUG ===");
 }
 
-// Call it immediately
-debugTokenIssue();
+document.addEventListener("DOMContentLoaded", function () {
+    console.log("Starting with backend integration...");
+    
+    // Run debug immediately
+    debugTokenIssue();
 
     // ======= SIDEBAR SETUP (Always works) =======
     const menuIcon = document.querySelector(".menu-icon");
@@ -98,45 +71,48 @@ debugTokenIssue();
         }
     });
 
-    // ======= TOKEN CHECK =======
+    // ======= TOKEN CHECK (NO REDIRECT) =======
     const token = localStorage.getItem("token") || localStorage.getItem("access_token");
     
     if (!token) {
-        console.log("No token found");
-        alert("Utilisateur non connecté. Redirection...");
-        window.location.href = "./log-in.html";
+        console.log("❌ No token found - continuing without backend");
+        loadFromLocalStorage();
         return;
     }
 
-    console.log("Token found, checking backend...");
-    console.log("Running token debug...");
-debugTokenIssue();
+    console.log("✅ Token found, checking backend...");
+
+    // ======= TOKEN MONITOR (FIXED PLACEMENT) =======
+    setInterval(async () => {
+        const currentToken = localStorage.getItem("token");
+        if (currentToken) {
+            try {
+                const payload = JSON.parse(atob(currentToken.split('.')[1]));
+                const expiry = new Date(payload.exp * 1000);
+                const now = new Date();
+                const minutesLeft = (expiry - now) / 1000 / 60;
+                
+                if (minutesLeft < 5 && minutesLeft > 0) {
+                    console.warn(`⚠️ Token expires in ${Math.round(minutesLeft)} minutes`);
+                } else if (minutesLeft <= 0) {
+                    console.error("❌ Token expired!");
+                }
+            } catch (error) {
+                console.error("Error checking token:", error);
+            }
+        }
+    }, 5 * 60 * 1000); // Check every 5 minutes
 
     // ======= BACKEND INTEGRATION =======
     initializeWithBackend(token);
 });
-// Add this to your profile page:
-setInterval(async () => {
-    const token = localStorage.getItem("token");
-    if (token) {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        const expiry = new Date(payload.exp * 1000);
-        const now = new Date();
-        const minutesLeft = (expiry - now) / 1000 / 60;
-        
-        if (minutesLeft < 5) {
-            console.log("Token expires in", minutesLeft, "minutes - consider refreshing");
-            // Auto redirect to login or refresh token
-        }
-    }
-}, 5 * 60 * 1000); // Check every 5 minutes
 
 async function initializeWithBackend(token) {
     try {
         // ======= 1. GET USER INFO =======
         console.log("Fetching user info...");
         const userInfo = await fetchUserInfo(token);
-        console.log("User info received:", userInfo);
+        console.log("✅ User info received:", userInfo);
         populateUserForm(userInfo);
 
         // ======= 2. GET USER PROGRESS =======
@@ -152,18 +128,27 @@ async function initializeWithBackend(token) {
         // ======= 5. SETUP PASSWORD TOGGLE =======
         setupPasswordToggle();
 
-        console.log("Backend integration complete!");
+        console.log("✅ Backend integration complete!");
 
     } catch (error) {
-        console.error("Backend integration failed:", error);
+        console.error("❌ Backend integration failed:", error);
         
+        // FIXED: NO MORE REDIRECTS
         if (error.message.includes("401")) {
-            alert("Session expirée.mode offline activé");
-            window.location.href = "./log-in.html";
+            console.error("❌ Token expired - continuing with localStorage");
+            alert("Session expirée. Mode local activé.");
         } else {
-            alert("Erreur backend. Mode offline activé.");
-            loadFromLocalStorage();
+            console.error("❌ Backend error - continuing with localStorage");
+            alert("Erreur backend. Mode local activé.");
         }
+        
+        // Load from localStorage and continue
+        loadFromLocalStorage();
+        
+        // Setup basic features without backend
+        setupProfileFeatures(token, {});
+        setupFormButtons(token);
+        setupPasswordToggle();
     }
 }
 
@@ -193,7 +178,6 @@ async function fetchUserProgress(token) {
     try {
         console.log("Making API call to /users/progress or /users/courses");
         
-        // Try different possible endpoints
         const endpoints = [
             "/users/courses",
             "/users/progress", 
@@ -215,7 +199,7 @@ async function fetchUserProgress(token) {
 
                 if (response.ok) {
                     const courses = await response.json();
-                    console.log(`Courses from ${endpoint}:`, courses);
+                    console.log(`✅ Courses from ${endpoint}:`, courses);
                     displayCourses(courses);
                     return courses;
                 }
@@ -225,14 +209,13 @@ async function fetchUserProgress(token) {
             }
         }
 
-        // If all endpoints fail, try localStorage
+        // If all endpoints fail, use localStorage
         console.log("All course endpoints failed, using localStorage");
         const localCourses = JSON.parse(localStorage.getItem("userCourses") || "[]");
         displayCourses(localCourses);
         
     } catch (error) {
         console.error("Error fetching user progress:", error);
-        // Fallback to localStorage
         const localCourses = JSON.parse(localStorage.getItem("userCourses") || "[]");
         displayCourses(localCourses);
     }
@@ -243,7 +226,6 @@ function populateUserForm(userInfo) {
     
     const inputs = document.querySelectorAll(".input-box input");
     
-    // Map common field names
     const fieldMapping = {
         'nom': ['nom', 'lastname', 'last_name'],
         'prenom': ['prenom', 'firstname', 'first_name'],
@@ -256,13 +238,11 @@ function populateUserForm(userInfo) {
     inputs.forEach(input => {
         const inputId = input.id;
         
-        // Direct match
         if (userInfo[inputId]) {
             input.value = userInfo[inputId];
             return;
         }
 
-        // Try mapped fields
         if (fieldMapping[inputId]) {
             for (const field of fieldMapping[inputId]) {
                 if (userInfo[field]) {
@@ -323,19 +303,17 @@ function setupProfileFeatures(token, userInfo) {
                 if (result.url) {
                     profilePic.src = result.url;
 
-                    // Update enlarged image if overlay is open
                     const enlargedImg = document.querySelector("#imgOverlay img");
                     if (enlargedImg) enlargedImg.src = result.url;
 
-                    // Update user profile
                     console.log("Updating user profile with new image...");
                     await updateUserProfile(token, { profile_image: result.url });
                     
-                    console.log("Profile picture updated successfully!");
+                    console.log("✅ Profile picture updated successfully!");
                 }
             } catch (error) {
-                console.error("Upload error:", error);
-                alert("Erreur upload. Mode local activé.");
+                console.error("❌ Upload error:", error);
+                alert("Erreur upload. Utilisation du mode local.");
                 
                 // Fallback to localStorage
                 const reader = new FileReader();
@@ -401,9 +379,9 @@ function showProfileOverlay(profilePic, uploadInput, token) {
             try {
                 console.log("Deleting profile picture...");
                 await updateUserProfile(token, { profile_image: null });
-                console.log("Profile picture deleted successfully!");
+                console.log("✅ Profile picture deleted successfully!");
             } catch (error) {
-                console.error("Delete error:", error);
+                console.error("❌ Delete error:", error);
             }
 
             overlay.remove();
@@ -461,21 +439,22 @@ function setupFormButtons(token) {
 
             try {
                 await updateUserProfile(token, updatedData);
-                alert("Informations sauvegardées avec succès !");
+                alert("✅ Informations sauvegardées avec succès !");
                 
                 // Backup to localStorage
                 localStorage.setItem("userData", JSON.stringify(updatedData));
                 
             } catch (error) {
-                console.error("Save error:", error);
+                console.error("❌ Save error:", error);
                 
-              if (error.message.includes("401")) {
-    alert("Token expiré. Sauvegarde échouée.");
-    console.error("❌ Cannot save - token expired");
-} else {
-    alert("Erreur sauvegarde. Sauvegardé localement.");
-    localStorage.setItem("userData", JSON.stringify(updatedData));
-}
+                // FIXED: NO MORE REDIRECTS
+                if (error.message.includes("401")) {
+                    console.error("❌ Cannot save - token expired");
+                    alert("Token expiré. Sauvegarde échouée.");
+                } else {
+                    alert("Erreur sauvegarde. Sauvegardé localement.");
+                    localStorage.setItem("userData", JSON.stringify(updatedData));
+                }
             }
         });
     }
@@ -487,8 +466,9 @@ function setupFormButtons(token) {
                 populateUserForm(userInfo);
                 alert("Modifications annulées !");
             } catch (error) {
-                console.error("Cancel error:", error);
-                location.reload();
+                console.error("❌ Cancel error:", error);
+                loadFromLocalStorage();
+                alert("Données restaurées depuis le cache local.");
             }
         });
     }
