@@ -33,24 +33,66 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // Fix: Check for correct token key
+    // Check token
     const token = localStorage.getItem("token") || localStorage.getItem("access_token");
     
     console.log("Token found:", token ? "Yes" : "No");
-    console.log("Token length:", token ? token.length : 0);
-
+    
     if (!token) {
         alert("Utilisateur non connecté.");
         return;
     }
 
-    // Setup profile functionality with backend
+    // Check if token is expired
+    if (isTokenExpired(token)) {
+        console.log("Token expired");
+        alert("Session expirée. Veuillez vous reconnecter.");
+        // Redirect to login
+        window.location.href = "login.html"; // Adjust path as needed
+        return;
+    }
+
+    // Load with backend
+    initializeProfile(token);
+});
+
+function isTokenExpired(token) {
+    try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const currentTime = Math.floor(Date.now() / 1000);
+        return payload.exp < currentTime;
+    } catch (e) {
+        console.error("Error parsing token:", e);
+        return true; // Assume expired if we can't parse
+    }
+}
+
+async function initializeProfile(token) {
+    console.log("Initializing profile with backend...");
+    
+    // Setup basic features that always work
     setupProfileFeatures(token);
     
-    // Load data
-    loadProfileData(token);
+    // Try to load profile data
+    try {
+        await loadProfileData(token);
+        console.log("Profile loaded successfully");
+    } catch (error) {
+        console.error("Failed to load profile:", error);
+        
+        if (error.message.includes("401")) {
+            alert("Session invalide. Redirection vers la connexion...");
+            window.location.href = "login.html";
+            return;
+        }
+        
+        // Use localStorage fallback
+        loadProfileFromLocalStorage();
+    }
+    
+    // Load courses (with fallback)
     loadCoursesFromBackend(token);
-});
+}
 
 function setupProfileFeatures(token) {
     const profilePic = document.getElementById("profilePic");
@@ -152,6 +194,10 @@ function setupProfileFeatures(token) {
                     body: formData
                 });
 
+                if (!uploadResponse.ok) {
+                    throw new Error(`Upload failed: ${uploadResponse.status}`);
+                }
+
                 const result = await uploadResponse.json();
                 if (result.url) {
                     profilePic.src = result.url;
@@ -169,9 +215,12 @@ function setupProfileFeatures(token) {
                         },
                         body: JSON.stringify({ profile_image: result.url })
                     });
+                    
+                    console.log("Profile image updated successfully");
                 }
             } catch (error) {
                 console.error("Error uploading profile image:", error);
+                alert("Erreur lors du téléchargement de l'image");
             }
         });
     }
@@ -181,47 +230,55 @@ function setupProfileFeatures(token) {
 }
 
 async function loadProfileData(token) {
-    try {
-        const response = await fetch("http://127.0.0.1:8000/users/me", {
-            method: "GET",
-            headers: {
-                "Authorization": `Bearer ${token}`,
-                "Content-Type": "application/json"
-            }
-        });
-
-        if (!response.ok) throw new Error(`Profile load failed: ${response.status}`);
-
-        const data = await response.json();
-        console.log("Profile loaded:", data);
-
-        // Load form data - check both field names
-        const inputs = document.querySelectorAll(".input-box input");
-        inputs.forEach(input => {
-            const value = data[input.id] || data[input.name];
-            if (value) input.value = value;
-        });
-
-        // Load profile image
-        const profilePic = document.getElementById("profilePic");
-        if (data.profile_image && profilePic) {
-            profilePic.src = data.profile_image;
+    const response = await fetch("http://127.0.0.1:8000/users/me", {
+        method: "GET",
+        headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
         }
+    });
 
-    } catch (error) {
-        console.error("Error loading profile:", error);
-        // Fallback to localStorage userData if available
-        const userData = localStorage.getItem("userData");
-        if (userData) {
-            try {
-                const data = JSON.parse(userData);
-                const inputs = document.querySelectorAll(".input-box input");
-                inputs.forEach(input => {
-                    if (data[input.id]) input.value = data[input.id];
-                });
-            } catch (e) {
-                console.error("Error parsing localStorage userData:", e);
-            }
+    if (!response.ok) {
+        throw new Error(`Profile load failed: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log("Profile loaded from backend:", data);
+
+    // Load form data
+    const inputs = document.querySelectorAll(".input-box input");
+    inputs.forEach(input => {
+        const value = data[input.id] || data[input.name];
+        if (value) input.value = value;
+    });
+
+    // Load profile image
+    const profilePic = document.getElementById("profilePic");
+    if (data.profile_image && profilePic) {
+        profilePic.src = data.profile_image;
+    }
+}
+
+function loadProfileFromLocalStorage() {
+    console.log("Loading profile from localStorage...");
+    
+    const userData = localStorage.getItem("userData");
+    if (userData) {
+        try {
+            const data = JSON.parse(userData);
+            const inputs = document.querySelectorAll(".input-box input");
+            
+            // Map the data to form fields
+            inputs.forEach(input => {
+                const key = input.id;
+                if (data[key]) {
+                    input.value = data[key];
+                }
+            });
+            
+            console.log("Profile loaded from localStorage");
+        } catch (e) {
+            console.error("Error parsing localStorage userData:", e);
         }
     }
 }
@@ -249,21 +306,37 @@ function setupFormButtons(token) {
                     body: JSON.stringify(updatedData)
                 });
 
-                if (response.ok) {
-                    alert("Informations enregistrées avec succès !");
-                } else {
+                if (!response.ok) {
                     throw new Error(`Save failed: ${response.status}`);
                 }
+
+                alert("Informations enregistrées avec succès !");
+                
+                // Update localStorage backup
+                localStorage.setItem("userData", JSON.stringify(updatedData));
+                
             } catch (error) {
                 console.error("Save error:", error);
-                alert("Erreur lors de la sauvegarde");
+                
+                if (error.message.includes("401")) {
+                    alert("Session expirée. Redirection vers la connexion...");
+                    window.location.href = "login.html";
+                } else {
+                    alert("Erreur lors de la sauvegarde. Sauvegardé localement.");
+                    // Save to localStorage as backup
+                    inputs.forEach(input => {
+                        localStorage.setItem(input.id, input.value);
+                    });
+                }
             }
         });
     }
 
     if (cancelBtn) {
         cancelBtn.addEventListener("click", function () {
-            loadProfileData(token);
+            loadProfileData(token).catch(() => {
+                loadProfileFromLocalStorage();
+            });
             alert("Modifications annulées !");
         });
     }
@@ -273,40 +346,26 @@ async function loadCoursesFromBackend(token) {
     const courseTableBody = document.getElementById("courseTableBody");
     if (!courseTableBody) return;
 
+    // Always try localStorage first since backend might not have /users/courses
+    const userCourses = JSON.parse(localStorage.getItem("userCourses") || "[]");
+    displayCourses(userCourses);
+
+    // Optionally try backend later (if endpoint exists)
     try {
-        // Use the correct endpoint - might be different
-        let response;
-        try {
-            response = await fetch("http://127.0.0.1:8000/users/courses", {
-                method: "GET",
-                headers: {
-                    "Authorization": `Bearer ${token}`,
-                    "Content-Type": "application/json"
-                }
-            });
-        } catch (error) {
-            // Fallback to localStorage userCourses
-            console.log("Using localStorage courses");
-            const userCourses = JSON.parse(localStorage.getItem("userCourses") || "[]");
-            displayCourses(userCourses);
-            return;
+        const response = await fetch("http://127.0.0.1:8000/users/courses", {
+            method: "GET",
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json"
+            }
+        });
+
+        if (response.ok) {
+            const backendCourses = await response.json();
+            displayCourses(backendCourses);
         }
-
-        if (!response.ok) {
-            // Try localStorage fallback
-            const userCourses = JSON.parse(localStorage.getItem("userCourses") || "[]");
-            displayCourses(userCourses);
-            return;
-        }
-
-        const userCourses = await response.json();
-        displayCourses(userCourses);
-
     } catch (error) {
-        console.error("Error loading courses:", error);
-        // Use localStorage as fallback
-        const userCourses = JSON.parse(localStorage.getItem("userCourses") || "[]");
-        displayCourses(userCourses);
+        console.log("Courses endpoint not available, using localStorage");
     }
 }
 
@@ -333,7 +392,7 @@ function displayCourses(userCourses) {
                 ${course.progress || 0}%
             </td>
             <td>${course.startDate || course.start_date || 'N/A'}</td>
-            <td>${course.endDate || course.end_date || 'N/A'}</td>
+            <td>${course.endDate || course.end_date || 'En cours'}</td>
             <td>${course.completed ? "✅ Terminé" : "⌛ En cours"}</td>
         `;
         courseTableBody.appendChild(row);
