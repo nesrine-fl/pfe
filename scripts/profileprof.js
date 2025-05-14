@@ -7,7 +7,6 @@
 };
 
 
-
 // Backend URL - use the deployed version consistently
 const BACKEND_URL = "https://backend-m6sm.onrender.com";
 
