@@ -151,34 +151,31 @@ function displayCourseStats(courses) {
 
 function displayCourseTable(courses) {
     const tbody = document.getElementById("courseTableBody");
-    tbody.innerHTML = "";
+    console.log("Courses received:", courses);
 
-    courses.forEach(course => {
-        const title = course.title || course.nom || "Cours sans nom";
-        const progress = course.progress || course.avancement || 0;
-        const startDate = course.startDate || course.start_date || "N/A";
-        const endDate = course.endDate || course.end_date || "En cours...";
-        const completed = course.completed === true || course.completed === "true" || progress === 100;
+    if (!tbody) {
+        console.error("❌ tbody element not found");
+        return;
+    }
 
-        const status = completed ? "✅ Terminé" : "📚 En cours";
+    if (!Array.isArray(courses)) {
+        console.error("❌ courses is not an array", courses);
+        return;
+    }
 
-        const row = document.createElement("tr");
-        row.innerHTML = `
-            <td>${title}</td>
-            <td>
-                <div style="width: 100%; background: #f0f0f0; border-radius: 10px; overflow: hidden;">
-                    <div style="width: ${progress}%; background: #4CAF50; height: 20px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px;">
-                        ${progress}%
-                    </div>
-                </div>
-            </td>
-            <td>${startDate}</td>
-            <td>${endDate}</td>
-            <td>${status}</td>
-        `;
-        tbody.appendChild(row);
+    if (courses.length === 0) {
+        console.warn("⚠️ No courses to display.");
+        tbody.innerHTML = "<tr><td colspan='5'>Aucun cours trouvé</td></tr>";
+        return;
+    }
+
+    tbody.innerHTML = "<tr><td colspan='5'>Rendering started...</td></tr>";
+
+    courses.forEach((course, i) => {
+        console.log(`Course ${i}:`, course);
     });
 }
+
 
 function displaySkills(courses) {
     const skillsList = document.getElementById("skillsList");
