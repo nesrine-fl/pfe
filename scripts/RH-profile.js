@@ -1,7 +1,8 @@
 // Global toggleNav function for HTML onclick
-document.addEventListener("DOMContentLoaded", function () {
-    const sidebar = document.getElementById("sidebar");
-};
+   function toggleNav() {
+        let sidebar = document.getElementById("sidebar");
+        sidebar.style.left = sidebar.style.left === "0px" ? "-250px" : "0px";
+    }
 
     // Fonction pour afficher/masquer la sidebar
     window.toggleSidebar = function () {
