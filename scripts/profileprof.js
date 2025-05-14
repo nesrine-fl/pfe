@@ -152,14 +152,19 @@ function displayCourseStats(courses) {
 function displayCourseTable(courses) {
     const tbody = document.getElementById("courseTableBody");
     tbody.innerHTML = "";
-    
+
     courses.forEach(course => {
+        const title = course.title || course.nom || "Cours sans nom";
+        const progress = course.progress || course.avancement || 0;
+        const startDate = course.startDate || course.start_date || "N/A";
+        const endDate = course.endDate || course.end_date || "En cours...";
+        const completed = course.completed === true || course.completed === "true" || progress === 100;
+
+        const status = completed ? "✅ Terminé" : "📚 En cours";
+
         const row = document.createElement("tr");
-        const progress = course.progress || 0;
-        const status = course.completed || progress === 100 ? "✅ Terminé" : "📚 En cours";
-        
         row.innerHTML = `
-            <td>${course.title || "Cours sans nom"}</td>
+            <td>${title}</td>
             <td>
                 <div style="width: 100%; background: #f0f0f0; border-radius: 10px; overflow: hidden;">
                     <div style="width: ${progress}%; background: #4CAF50; height: 20px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px;">
@@ -167,8 +172,8 @@ function displayCourseTable(courses) {
                     </div>
                 </div>
             </td>
-            <td>${course.startDate || course.start_date || "N/A"}</td>
-            <td>${course.endDate || course.end_date || "En cours..."}</td>
+            <td>${startDate}</td>
+            <td>${endDate}</td>
             <td>${status}</td>
         `;
         tbody.appendChild(row);
