@@ -154,16 +154,16 @@ function displayCourseTable(courses) {
     tbody.innerHTML = "";
 
     courses.forEach(course => {
-        const title = course.title || course.nom_du_cours || "Cours sans nom";
+        const title = course.nom_du_cours || "Cours sans nom";
+        
+        // Strip % if necessary
+        const progressStr = course.progres || "0%";
+        const progress = parseFloat(progressStr.replace('%', '')) || 0;
 
-        // Handle progress: remove % and convert to number
-        const progressString = course.progres || "0%";
-        const progress = parseFloat(progressString.replace('%', '')) || 0;
-
-        const startDate = course.startDate || course.date_debut || "N/A";
-        const endDate = course.endDate || course.date_fin || "En cours...";
-
+        const startDate = course.date_debut || "N/A";
+        const endDate = course.date_fin || "En cours...";
         const completed = progress === 100;
+
         const status = completed ? "✅ Terminé" : "📚 En cours";
 
         const row = document.createElement("tr");
