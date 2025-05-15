@@ -14,6 +14,9 @@ const BACKEND_URL = "https://backend-m6sm.onrender.com";
 
 document.addEventListener("DOMContentLoaded", function () {
     console.log("Starting with backend integration...");
+     if (menuIcon) {
+        menuIcon.addEventListener("click", toggleSidebar);
+    }
 
     // ======= SIDEBAR SETUP (Always works) =======
     const menuIcon = document.querySelector(".menu-icon");
