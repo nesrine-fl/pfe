@@ -168,6 +168,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const totalCourses = document.getElementById("totalCourses");
     const completedCourses = document.getElementById("completedCourses");
     const averageProgress = document.getElementById("averageProgress");
+    )};
+
 
     // Récupérer les cours stockés
     let userCourses = JSON.parse(localStorage.getItem("userCourses")) || [];
