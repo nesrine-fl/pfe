@@ -318,6 +318,7 @@ body {
 /* 📌 Sidebar Visibility */
 .sidebar.active {
     left: 0;
+     transform: translateX(0);
 }
 
 
