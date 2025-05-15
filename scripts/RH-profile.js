@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
 // Global toggleNav function for HTML onclick
-   function toggleNav() {
+   function toggleSidebar() {
         let sidebar = document.getElementById("sidebar");
         sidebar.style.left = sidebar.style.left === "0px" ? "-250px" : "0px";
     }
@@ -8,8 +8,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     
-    document.querySelector(".menu-icon").addEventListener("click", toggleNav);
-    document.querySelector(".close-btn").addEventListener("click", toggleNav);
+    document.querySelector(".menu-icon").addEventListener("click", toggleSidebar);
+    document.querySelector(".close-btn").addEventListener("click",toggleSidebar);
 
 
 // Backend URL - use the deployed version consistently
