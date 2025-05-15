@@ -2,6 +2,7 @@ function toggleSidebar() {
   const sidebar = document.getElementById("sidebar");
   sidebar.style.left = sidebar.style.left === "0px" ? "-250px" : "0px";
 }
+
 document.addEventListener("DOMContentLoaded", () => {
   const token = localStorage.getItem("access_token");
   if (!token) {
@@ -15,6 +16,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const sidebar = document.getElementById("sidebar");
     sidebar.style.left = sidebar.style.left === "0px" ? "-250px" : "0px";
   }
+  const menuIcon = document.querySelector(".menu-icon");
+if (menuIcon) {
+  menuIcon.addEventListener("click", toggleSidebar);
+}
+
   document.querySelector(".menu-icon").addEventListener("click", toggleSidebar);
   document.querySelector(".close-btn").addEventListener("click", toggleSidebar);
 
