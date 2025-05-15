@@ -35,7 +35,29 @@ body {
 
 
 /* 🌟 Sidebar Container */
-
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 250px;
+    height: 100%;
+    background-color: #fff;
+    color: #333;
+    overflow-x: hidden;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease-in-out;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
+    border-right: 1px solid #ddd;
+}
+/* Sidebar shown */
+.sidebar.active {
+    transform: translateX(0);
+    
+}
 /* icons */
 
 /* Style for icons */
@@ -170,30 +192,8 @@ body {
 
 
 /* Sidebar default hidden */
-.sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 250px;
-    height: 100%;
-    background-color: #fff;
-    color: #333;
-    overflow-x: hidden;
-    transform: translateX(-100%);
-    transition: transform 0.3s ease-in-out;
-    z-index: 1000;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
-    border-right: 1px solid #ddd;
-}
 
-/* Sidebar shown */
-.sidebar.active {
-    transform: translateX(0);
-    
-}
+
 
 
 
