@@ -1,8 +1,13 @@
-// Global toggleNav function for HTML onclick
-function toggleNav() {
-    document.getElementById("sidebar").classList.toggle("active"); // Ajouter ou supprimer la classe active
-}
 
+function toggleSidebar() {
+    var sidebar = document.getElementById("sidebar");
+    // Check the current width of the sidebar and adjust it
+    if (sidebar.style.width === "250px") {
+        sidebar.style.width = "0"; // Close the sidebar
+    } else {
+        sidebar.style.width = "250px"; // Open the sidebar
+    }
+}
 
 // Backend URL - use the deployed version consistently
 const BACKEND_URL = "https://backend-m6sm.onrender.com";
