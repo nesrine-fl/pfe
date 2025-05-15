@@ -176,6 +176,7 @@ body {
     
     position: fixed;
     top: 0;
+      transform: translateX(-100%);
        left: -250px;
      width: 250px; /* largeur visible */
     background-color: #fff;
