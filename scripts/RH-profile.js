@@ -8,15 +8,35 @@ function toggleSidebar() {
     }
 }
 
-
-// Backend URL - use the deployed version consistently
-const BACKEND_URL = "https://backend-m6sm.onrender.com";
-
 document.addEventListener("DOMContentLoaded", function () {
     console.log("Starting with backend integration...");
      if (menuIcon) {
         menuIcon.addEventListener("click", toggleSidebar);
     }
+    
+    // ======= SIDEBAR SETUP (Always works) =======
+    const menuIcon = document.querySelector(".menu-icon");
+    const closeBtn = document.querySelector(".close-btn");
+    const sidebar = document.getElementById("sidebar");
+   });
+
+
+
+    // Close sidebar on outside click
+    document.addEventListener("click", function (event) {
+        if (sidebar && menuIcon && 
+            !sidebar.contains(event.target) && 
+            !menuIcon.contains(event.target) &&
+            sidebar.style.left === "0px") {
+            sidebar.style.left = "-250px";
+        }
+    });
+
+
+
+// Backend URL - use the deployed version consistently
+const BACKEND_URL = "https://backend-m6sm.onrender.com";
+
 
     // ======= SIDEBAR SETUP (Always works) =======
     const menuIcon = document.querySelector(".menu-icon");
@@ -45,12 +65,13 @@ document.addEventListener("DOMContentLoaded", function () {
         setupProfileFeatures();
         return;
     }
+});
 
     console.log("Token found, checking backend...");
 
     // ======= BACKEND INTEGRATION =======
     initializeWithBackend(token);
-});
+);}
 
 async function initializeWithBackend(token) {
     try {
