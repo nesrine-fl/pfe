@@ -176,8 +176,8 @@ body {
     
     position: fixed;
     top: 0;
-    left: 0;
-    
+       left: -250px;
+     width: 250px; /* largeur visible */
     background-color: #fff;
     overflow-x: hidden;
     transition: 0.5s;
