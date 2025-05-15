@@ -1,15 +1,12 @@
-document.addEventListener("DOMContentLoaded", function () {
-// Global toggleNav function for HTML onclick
-   function toggleSidebar() {
-        let sidebar = document.getElementById("sidebar");
-        sidebar.style.left = sidebar.style.left === "0px" ? "-250px" : "0px";
+function toggleSidebar() {
+    var sidebar = document.getElementById("sidebar");
+    // Check the current width of the sidebar and adjust it
+    if (sidebar.style.width === "250px") {
+        sidebar.style.width = "0"; // Close the sidebar
+    } else {
+        sidebar.style.width = "250px"; // Open the sidebar
     }
-
-
-
-    
-    document.querySelector(".menu-icon").addEventListener("click", toggleSidebar);
-    document.querySelector(".close-btn").addEventListener("click",toggleSidebar);
+}
 
 
 // Backend URL - use the deployed version consistently
