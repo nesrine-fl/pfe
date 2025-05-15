@@ -1,3 +1,7 @@
+function toggleSidebar() {
+  const sidebar = document.getElementById("sidebar");
+  sidebar.style.left = sidebar.style.left === "0px" ? "-250px" : "0px";
+}
 document.addEventListener("DOMContentLoaded", () => {
   const token = localStorage.getItem("access_token");
   if (!token) {
