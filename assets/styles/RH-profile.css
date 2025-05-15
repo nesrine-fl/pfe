@@ -35,6 +35,7 @@ body {
 
 
 /* 🌟 Sidebar Container */
+
 .sidebar {
     position: fixed;
     top: 0;
@@ -50,20 +51,17 @@ body {
     justify-content: space-between;
     box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
     border-right: 1px solid #ddd;
+    overflow-y: auto;        
+    overflow-x: hidden; 
 }
 
-/* Sidebar shown */
-.sidebar.active {
-    transform: translateX(0);
-    
-}
 /* icons */
 
 /* Style for icons */
 .sidebar ul li a i,
 .sidebar-footer a i {
     margin-right: 10px;
-    font-size: 18px;
+    font-size: 14px;
     color: #555;
     transition: color 0.3s ease-in-out;
 }
@@ -98,7 +96,7 @@ body {
 .sidebar ul {
     list-style: none;
     padding: 0;
-    margin: 60px 0 0;
+    margin: 40px 0 0;
 }
 
 .sidebar ul li {
@@ -149,7 +147,7 @@ body {
     align-items: center;
     color: #333;
     text-decoration: none;
-    font-size: 18px;
+    font-size: 17px;
     padding: 12px;
     font-weight: 600;
     transition: all 0.3s ease-in-out;
@@ -188,158 +186,6 @@ body {
 
 
 
-
-
-/* Sidebar default hidden */
-
-
-
-
-
-/* Style for icons */
-.sidebar ul li a i,
-.sidebar-footer a i {
-    margin-right: 10px;
-    font-size: 18px;
-    color: #555;
-    transition: color 0.3s ease-in-out;
-    gap: 10p;
-}
-
-
-
-/* Change icon color on hover */
-.sidebar ul li a:hover i,
-.sidebar-footer a:hover i {
-    color: blue;
-}
-.sidebar-footer .logout:hover i{
-    color: red;
-}
-
-
-
-
-/* ✖ Close Button */
-.close-btn {
-    position: absolute;
-    top: 15px;
-    right: 20px;
-    background: none;
-    border: none;
-    color: #333;
-    font-size: 22px;
-    cursor: pointer;
-    transition: transform 0.2s ease-in-out;
-}
-
-.close-btn:hover {
-
-    color: red;
-}
-
-/* 📌 Sidebar Navigation Links */
-.sidebar ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-
-}
-
-.sidebar ul li {
-    padding: 15px;
-    transition: all 0.3s ease-in-out;
-    cursor: pointer;
-}
-
-.sidebar ul li:hover {
-    background: #f0f0f0;
-}
-
-/* 🌟 Sidebar Links */
-.sidebar ul li a {
-    display: flex;
-    align-items: center;
-    color: #333;
-    text-decoration: none;
-    padding: 12px;
-    
-    font-weight: 600;
-    transition: all 0.3s ease-in-out;
-    border-radius: 5px;
-}
-
-.sidebar ul li a:hover {
-    background: rgba(0, 0, 255, 0.1);
-    color: blue;
-    transform: translateX(5px);
-}
-
-/* 🔵 Active Link */
-.sidebar ul li a.active {
-    color: blue;
-    border-left: 4px solid blue;
-    background: rgba(0, 0, 255, 0.1);
-}
-
-/* ⚙ Sidebar Footer (Settings & Logout) */
-.sidebar-footer {
-    padding: 15px;
-    border-top: 1px solid #ddd;
-    display: flex;
-    flex-direction: column;
-}
-
-.sidebar-footer a {
-    display: flex;
-    align-items: center;
-    color: #333;
-    text-decoration: none;
-    font-size: 18px;
-    padding: 12px;
-    font-weight: 600;
-    transition: all 0.3s ease-in-out;
-}
-
-.sidebar-footer a:hover {
-    background: rgba(0, 0, 255, 0.1);
-    color: blue;
-    transform: translateX(5px);
-}
-
-/* 🔴 Logout Button */
-.sidebar-footer .logout {
-    color: red;
-    font-weight: bold;
-}
-
-.sidebar-footer .logout:hover {
-    background: rgba(255, 0, 0, 0.1);
-    color: darkred;
-}
-
-
-
-
-.active {
-    color: #000;
-
-}
-
-.sidebar h2, .sidebar p {
-    padding: 8px 10px;
-}
-/* Close button */
-/* .close-btn {
-    position: absolute;
-    top: 20px;
-    right: 25px;
-    font-size: 36px;
-    color: black;
-    background: none;
-    border: none;
-    cursor: pointer;
-} */
 
 
 
