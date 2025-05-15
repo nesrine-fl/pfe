@@ -1,11 +1,9 @@
 // Global toggleNav function for HTML onclick
-document.addEventListener("DOMContentLoaded", function () {
+function toggleNav() {
     const sidebar = document.getElementById("sidebar");
-
-    // Fonction pour afficher/masquer la sidebar
-    window.toggleSidebar = function () {
-        sidebar.classList.toggle("active");
-    };
+    const currentLeft = window.getComputedStyle(sidebar).left;
+    sidebar.style.left = currentLeft === "0px" ? "-250px" : "0px";
+}
 
 
 // Backend URL - use the deployed version consistently
@@ -19,8 +17,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const closeBtn = document.querySelector(".close-btn");
     const sidebar = document.getElementById("sidebar");
 
-    if (menuIcon) menuIcon.addEventListener("click", toggleSidebar);
-if (closeBtn) closeBtn.addEventListener("click", toggleSidebar);
+    if (menuIcon) menuIcon.addEventListener("click", toggleNav);
+    if (closeBtn) closeBtn.addEventListener("click", toggleNav);
 
     // Close sidebar on outside click
     document.addEventListener("click", function (event) {
