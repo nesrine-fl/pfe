@@ -35,22 +35,6 @@ body {
 
 
 /* 🌟 Sidebar Container */
-.sidebar {
-    position: fixed;
-    top: 0;
-    left: -250px; /* Sidebar is hidden by default */
-    width: 250px;
-    height: 100%;
-    background: #ffffff;
-    color: #333;
-    transition: left 0.3s ease-in-out;
-    z-index: 1000;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
-    border-right: 1px solid #ddd;
-}
 
 /* icons */
 
