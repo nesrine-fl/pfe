@@ -8,6 +8,7 @@ function toggleSidebar() {
         sidebar.style.width = "250px"; // Open the sidebar
     }
 }
+
 const BACKEND_URL = "https://backend-m6sm.onrender.com";
 
 document.addEventListener("DOMContentLoaded", function () {
