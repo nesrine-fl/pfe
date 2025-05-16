@@ -41,28 +41,32 @@ async function markNotificationRead(notificationId) {
 }
 
 async function fetchNotifications() {
-  try {
-    const response = await fetch('https://your-backend-domain.com/notifications/', {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${yourAccessToken}`,  // insert your JWT token here
-        'Content-Type': 'application/json'
-      }
-    });
+    const token = localStorage.getItem("access_token");
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+    if (!token) {
+        console.error("Token non trouvé. L'utilisateur n'est peut-être pas connecté.");
+        return;
     }
 
-    const notifications = await response.json();
-    console.log('Notifications:', notifications);
-    return notifications;
+    try {
+        const response = await fetch("http://127.0.0.1:8000/notifications/", {
+            method: "GET",
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
 
-  } catch (error) {
-    console.error('Erreur lors de la récupération des notifications :', error);
-    throw error;
-  }
+        if (!response.ok) {
+            throw new Error("Échec de la récupération des notifications");
+        }
+
+        const data = await response.json();
+        displayNotifications(data); // ou toute autre fonction qui les affiche
+    } catch (error) {
+        console.error("Erreur lors de la récupération des notifications :", error);
+    }
 }
+
 
 function displayNotifications(notifs) {
     const notificationList = document.querySelector(".notifications");
