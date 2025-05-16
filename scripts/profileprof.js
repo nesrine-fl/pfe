@@ -102,13 +102,7 @@ async function fetchUserInfo(token) {
     return await response.json();
 }
 async function fetchUserCourses(token) {
-    try {
-        const response = await fetch(`${BACKEND_URL}/users/progress`, {
-            method: "GET",
-            headers: {
-                "Authorization": `Bearer ${token}`,
-                "Content-Type": "application/json"
-            }
+ 
         });
 
         if (response.ok) {
