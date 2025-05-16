@@ -1,21 +1,32 @@
-const BACKEND_URL = "https://backend-m6sm.onrender.com";
+const BACKEND_URL = "http://127.0.0.1:8000";
 
-document.addEventListener("DOMContentLoaded", async () => {
-    const token = localStorage.getItem("access_token");
+localStorage.setItem("access_token", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJzZWxsYW1pYW1pbmVAZ21haWwuY29tIiwiZXhwIjoxNzQ3NDE5NzMwfQ.WiALtqhbXaEjf5wUVz4uQuCyQUvTY34m7v2qaECtPao");
 
-    if (!token) {
-        alert("Utilisateur non connecté");
-        return;
+async function fetchNotifications() {
+  const token = localStorage.getItem("access_token");
+  if (!token) {
+    console.error("Token d'accès manquant");
+    return;
+  }
+  try {
+    const response = await fetch(`${BACKEND_URL}/notifications/`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      }
+    });
+    if (!response.ok) {
+      throw new Error(`Erreur HTTP ${response.status}`);
     }
+    const notifications = await response.json();
+    console.log("Notifications reçues :", notifications);
+  } catch (err) {
+    console.error("Erreur lors de la récupération des notifications :", err);
+  }
+}
 
-    try {
-        const notifications = await fetchNotifications(token);
-        displayNotifications(notifications);
-        sortNotifications();
-    } catch (error) {
-        console.error("Erreur lors de la récupération des notifications :", error);
-    }
-});
+// Appelle la fonction pour tester
+fetchNotifications();
+
 
 // 🔄 FETCH notifications
 async function fetchNotifications(token) {
