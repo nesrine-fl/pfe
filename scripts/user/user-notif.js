@@ -1,85 +1,80 @@
 const BACKEND_URL = "https://backend-m6sm.onrender.com";
 
-document.addEventListener("DOMContentLoaded", async () => {
-    const token = localStorage.getItem("access_token");
+// ✅ Auth token (ex. récupéré après login)
+const accessToken = "ACCESS_TOKEN_ICI"; // ⛔ REMPLACE ceci par le vrai token JWT
 
-    if (!token) {
+document.addEventListener("DOMContentLoaded", async () => {
+    if (!accessToken) {
         alert("Utilisateur non connecté");
         return;
     }
 
     try {
-        const notifications = await fetchNotifications(token);
+        const notifications = await fetchNotifications(accessToken);
         displayNotifications(notifications);
         sortNotifications();
     } catch (error) {
         console.error("Erreur lors de la récupération des notifications :", error);
     }
 });
-async function markNotificationRead(notificationId) {
-  try {
-    const response = await fetch(`https://your-backend-domain.com/notifications/${notificationId}/read`, {
-      method: 'PUT',
-      headers: {
-        'Authorization': `Bearer ${yourAccessToken}`,
-        'Content-Type': 'application/json'
-      }
-    });
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const result = await response.json();
-    console.log('Mark read result:', result);
-    return result;
-
-  } catch (error) {
-    console.error('Erreur lors du marquage de notification comme lue :', error);
-    throw error;
-  }
-}
-
-async function fetchNotifications() {
-    const token = localStorage.getItem("access_token");
-
-    if (!token) {
-        console.error("Token non trouvé. L'utilisateur n'est peut-être pas connecté.");
-        return;
-    }
-
+async function fetchNotifications(token) {
     try {
-        const response = await fetch("http://127.0.0.1:8000/notifications/", {
+        const response = await fetch(`${BACKEND_URL}/notifications/`, {
             method: "GET",
             headers: {
-                Authorization: `Bearer ${token}`
+                "Authorization": `Bearer ${token}`
             }
         });
 
         if (!response.ok) {
-            throw new Error("Échec de la récupération des notifications");
+            throw new Error(`Échec de la récupération des notifications - Code ${response.status}`);
         }
 
-        const data = await response.json();
-        displayNotifications(data); // ou toute autre fonction qui les affiche
+        return await response.json();
     } catch (error) {
         console.error("Erreur lors de la récupération des notifications :", error);
+        throw error;
     }
 }
 
+async function markNotificationRead(notificationId) {
+    try {
+        const response = await fetch(`${BACKEND_URL}/notifications/${notificationId}/read`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        console.log('Mark read result:', result);
+        return result;
+
+    } catch (error) {
+        console.error('Erreur lors du marquage de notification comme lue :', error);
+        throw error;
+    }
+}
 
 function displayNotifications(notifs) {
     const notificationList = document.querySelector(".notifications");
-    notificationList.innerHTML = ""; // Clear existing
+    notificationList.innerHTML = "";
 
     notifs.forEach(notif => {
         const div = document.createElement("div");
         div.classList.add("notification");
         if (!notif.read) div.classList.add("unread");
+        div.dataset.id = notif.id;
         div.dataset.type = notif.type;
         div.dataset.content = notif.content;
         div.innerHTML = `
-            <span class="message">${notif.title}</span>
+            <span class="message">${notif.title || "Notification"}</span>
             <span class="timestamp">${getTimestamp()}</span>
         `;
         div.addEventListener("click", () => showNotification(div));
