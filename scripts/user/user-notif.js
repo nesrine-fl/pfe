@@ -7,9 +7,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const backButton = document.getElementById('backButton');
   const sidebar = document.getElementById('sidebar');
 
-  // Replace with your real backend API URL for fetching notifications
-  const API_URL = 'const API_URL = 'http://127.0.0.1:8000/api/notifications';
-';
+
+const API_URL = 'https://your-deployed-backend.com/api/notifications'; // if deployed
+
 
   // Fetch notifications from backend
   async function fetchNotifications() {
