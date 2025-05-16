@@ -1,21 +1,29 @@
+
+
 // SIDEBAR TOGGLE
 function toggleSidebar() {
     var sidebar = document.getElementById("sidebar");
-    // Check the current width of the sidebar and adjust it
     if (sidebar.style.width === "250px") {
-        sidebar.style.width = "0"; // Close the sidebar
+        sidebar.style.width = "0";
     } else {
-        sidebar.style.width = "250px"; // Open the sidebar
+        sidebar.style.width = "250px";
     }
 }
 
-
 const BACKEND_URL = "https://backend-m6sm.onrender.com";
 
-    const token = localStorage.getItem("token") || localStorage.getItem("access_token");
-    
+// 🔑 Extract token from URL
+function getTokenFromURL() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get("token");
+}
+
+// ✅ MAIN INITIALIZER
+document.addEventListener("DOMContentLoaded", function () {
+    const token = getTokenFromURL();
+
     if (!token) {
-        console.error("Token non trouvé. Rediriger ou afficher une erreur.");
+        console.error("Token non trouvé dans l’URL.");
         return;
     }
 
@@ -123,7 +131,7 @@ function displaySkills(courses) {
     });
 }
 
-function setupProfileFeatures(token = null, userInfo = null) {
+function setupProfileFeatures(token, userInfo) {
     const profilePic = document.getElementById("profilePic");
     const uploadInput = document.getElementById("uploadProfilePic");
     const changePicBtn = document.getElementById("changePicBtn");
@@ -195,11 +203,7 @@ function setupProfileFeatures(token = null, userInfo = null) {
             });
             newDeletePicBtn.addEventListener("click", async () => {
                 overlay.remove();
-                if (token) {
-                    await deleteProfilePictureFromBackend(token);
-                } else {
-                    profilePic.src = defaultImage;
-                }
+                await deleteProfilePictureFromBackend(token);
             });
 
             const closeBtn = document.createElement("button");
@@ -236,11 +240,7 @@ function setupProfileFeatures(token = null, userInfo = null) {
 
     if (deletePicBtn) {
         deletePicBtn.addEventListener("click", async () => {
-            if (token) {
-                await deleteProfilePictureFromBackend(token);
-            } else {
-                profilePic.src = defaultImage;
-            }
+            await deleteProfilePictureFromBackend(token);
         });
     }
 
@@ -251,9 +251,7 @@ function setupProfileFeatures(token = null, userInfo = null) {
                 const reader = new FileReader();
                 reader.onload = async function (e) {
                     profilePic.src = e.target.result;
-                    if (token) {
-                        await uploadProfilePictureToBackend(token, file);
-                    }
+                    await uploadProfilePictureToBackend(token, file);
                 };
                 reader.readAsDataURL(file);
             }
