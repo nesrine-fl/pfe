@@ -98,9 +98,9 @@ async function fetchUserInfo(token) {
         throw new Error(`User info fetch failed: ${response.status}`);
     }
 
+    // ✅ Expected response: { profile: {...}, courses: [...] }
     return await response.json();
 }
-
 async function fetchUserCourses(token) {
     try {
         const response = await fetch(`${BACKEND_URL}/users/progress`, {
@@ -125,6 +125,24 @@ async function fetchUserCourses(token) {
         loadCoursesFromLocalStorage();
     }
 }
+
+async function initializeWithBackend(token) {
+    try {
+        const userInfo = await fetchUserInfo(token);
+        populateUserForm(userInfo); // assuming this is just profile
+
+        await fetchUserCourses(token); // separate call for course progress
+
+        setupProfileFeatures(token, userInfo);
+        console.log("Backend integration complete!");
+    } catch (error) {
+        console.error("Backend integration failed:", error);
+        loadFromLocalStorage();
+        setupProfileFeatures();
+    }
+}
+
+
 
 function populateUserForm(userInfo) {
     console.log("Populating form with user info");
