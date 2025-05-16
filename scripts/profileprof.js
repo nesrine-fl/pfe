@@ -101,9 +101,7 @@ async function fetchUserInfo(token) {
     // ✅ Expected response: { profile: {...}, courses: [...] }
     return await response.json();
 }
-async function fetchUserCourses(token) {
- 
-        });
+
 
         if (response.ok) {
             const courses = await response.json();
