@@ -8,6 +8,12 @@ function toggleSidebar() {
         sidebar.style.width = "250px"; // Open the sidebar
     }
 }
+// SIDEBAR TOGGLE
+function toggleNav() {
+    const sidebar = document.getElementById("sidebar");
+    const currentLeft = window.getComputedStyle(sidebar).left;
+    sidebar.style.left = currentLeft === "0px" ? "-250px" : "0px";
+}
 
 const BACKEND_URL = "https://backend-m6sm.onrender.com";
 
