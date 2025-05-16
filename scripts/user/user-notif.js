@@ -1,171 +1,132 @@
-const BACKEND_URL = "http://127.0.0.1:8000";
+// user-notif.js
 
-localStorage.setItem("access_token", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJzZWxsYW1pYW1pbmVAZ21haWwuY29tIiwiZXhwIjoxNzQ3NDE5NzMwfQ.WiALtqhbXaEjf5wUVz4uQuCyQUvTY34m7v2qaECtPao");
+document.addEventListener('DOMContentLoaded', () => {
+  const notifDot = document.getElementById('notifDot');
+  const notificationsList = document.querySelector('.notifications');
+  const mainContent = document.querySelector('.main-content');
+  const backButton = document.getElementById('backButton');
+  const sidebar = document.getElementById('sidebar');
 
-async function fetchNotifications() {
-  const token = localStorage.getItem("access_token");
-  if (!token) {
-    console.error("Token d'accès manquant");
-    return;
-  }
-  try {
-    const response = await fetch(`${BACKEND_URL}/notifications/`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      }
-    });
-    if (!response.ok) {
-      throw new Error(`Erreur HTTP ${response.status}`);
-    }
-    const notifications = await response.json();
-    console.log("Notifications reçues :", notifications);
-  } catch (err) {
-    console.error("Erreur lors de la récupération des notifications :", err);
-  }
-}
+  // Replace with your real backend API URL for fetching notifications
+  const API_URL = 'https://your-api-url.com/api/notifications';
 
-// Appelle la fonction pour tester
-fetchNotifications();
-
-
-// 🔄 FETCH notifications
-async function fetchNotifications(token) {
+  // Fetch notifications from backend
+  async function fetchNotifications() {
     try {
-        const response = await fetch(`${BACKEND_URL}/notifications/`, {
-            method: "GET",
-            headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "application/json"
-            }
-        });
-
-        if (!response.ok) {
-            throw new Error("Échec de la récupération des notifications");
-        }
-
-        return await response.json();
+      const response = await fetch(API_URL);
+      if (!response.ok) throw new Error('Network response was not ok');
+      const data = await response.json();
+      renderNotifications(data);
+      updateNotifDot();
     } catch (error) {
-        console.error("Erreur lors de la récupération des notifications :", error);
-        throw error;
+      console.error('Fetch error:', error);
+      notificationsList.innerHTML = '<li>Erreur lors du chargement des notifications.</li>';
     }
-}
+  }
 
-// ✅ MARK AS READ
-async function markNotificationRead(notificationId) {
-    const token = localStorage.getItem("access_token");
+  // Render notifications in sidebar list
+  function renderNotifications(notifs) {
+    notificationsList.innerHTML = ''; // Clear existing list
 
-    try {
-        const response = await fetch(`${BACKEND_URL}/notifications/${notificationId}/read`, {
-            method: "PUT",
-            headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "application/json"
-            }
-        });
-
-        if (!response.ok) {
-            throw new Error(`Erreur HTTP : ${response.status}`);
-        }
-
-        return await response.json();
-    } catch (error) {
-        console.error("Erreur lors du marquage :", error);
-        throw error;
+    if (!notifs.length) {
+      notificationsList.innerHTML = '<li>Aucune notification</li>';
+      return;
     }
-}
-
-// 📬 DISPLAY notifications
-function displayNotifications(notifs) {
-    const notificationList = document.querySelector(".notifications");
-    notificationList.innerHTML = "";
 
     notifs.forEach(notif => {
-        const div = document.createElement("div");
-        div.classList.add("notification");
-        if (!notif.read) div.classList.add("unread");
+      const li = document.createElement('li');
+      li.classList.add('notification');
+      if (!notif.read) li.classList.add('unread');
+      if (notif.type) li.dataset.type = notif.type;
+      li.dataset.content = notif.content || '';
+      li.textContent = notif.title || 'Notification';
 
-        div.dataset.type = notif.type;
-        div.dataset.content = notif.content;
-        div.dataset.id = notif.id;
+      const spanTimestamp = document.createElement('span');
+      spanTimestamp.className = 'timestamp';
+      spanTimestamp.textContent = notif.timestamp ? formatTimestamp(notif.timestamp) : '';
+      li.appendChild(spanTimestamp);
 
-        div.innerHTML = `
-            <span class="message">${notif.title}</span>
-            <span class="timestamp">${getTimestamp()}</span>
-        `;
+      li.addEventListener('click', () => showNotification(li, notif));
 
-        div.addEventListener("click", async () => {
-            showNotification(div);
-            await markNotificationRead(notif.id);
-            div.classList.remove("unread");
-        });
-
-        notificationList.appendChild(div);
+      notificationsList.appendChild(li);
     });
-}
+  }
 
-// ⏱ TIMESTAMP
-function getTimestamp() {
+  // Format timestamp (shows time if today, else date)
+  function formatTimestamp(ts) {
+    const date = new Date(ts);
     const now = new Date();
-    return `${now.getHours()}:${now.getMinutes().toString().padStart(2, "0")}`;
-}
+    if (
+      date.getDate() === now.getDate() &&
+      date.getMonth() === now.getMonth() &&
+      date.getFullYear() === now.getFullYear()
+    ) {
+      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+    return date.toLocaleDateString();
+  }
 
-// 🧮 SORT notifications
-function sortNotifications() {
-    const notificationList = document.querySelector(".notifications");
-    const notifications = Array.from(notificationList.children);
+  // Update notification dot visibility (show if any unread)
+  function updateNotifDot() {
+    const unreadCount = document.querySelectorAll('.notification.unread').length;
+    notifDot.style.display = unreadCount > 0 ? 'block' : 'none';
+  }
 
-    notifications.sort((a, b) => {
-        return b.querySelector(".timestamp").innerText.localeCompare(
-            a.querySelector(".timestamp").innerText
-        );
-    });
+  // Show notification detail in main content area
+  function showNotification(li, notifData) {
+    // Mark notification as read visually
+    li.classList.remove('unread');
+    updateNotifDot();
 
-    notifications.forEach(notif => notificationList.appendChild(notif));
-}
-
-// 🎛️ SIDEBAR toggle
-function toggleNav() {
-    document.getElementById("sidebar").classList.toggle("active");
-}
-
-// 🔎 SHOW notif content
-function showNotification(element) {
-    const contentArea = document.querySelector(".main-content");
-    const sidebar = document.querySelector(".sidebar1");
-
-    contentArea.innerHTML = `
-        <span id="backButton" class="material-symbols-outlined" onclick="HideNotif()">arrow_back</span>
-        <div class="notif">${element.dataset.content}</div>
+    // Show back button and notification content
+    backButton.style.display = 'inline-block';
+    mainContent.innerHTML = `
+      <h2>Détail de la notification</h2>
+      <p>${notifData.content || li.dataset.content || li.textContent}</p>
+      <p><small>${li.querySelector('.timestamp').textContent}</small></p>
     `;
-    sidebar.classList.add("hidden");
-    contentArea.classList.add("visible");
-}
 
-// 🔙 HIDE content
-function HideNotif() {
-    const contentArea = document.querySelector(".main-content");
-    const sidebar = document.querySelector(".sidebar1");
+    // Optionally, here you can add code to mark notification as read in backend via fetch/POST
+  }
 
-    contentArea.innerHTML = `<p>Sélectionnez une notification pour voir les détails.</p>`;
-    sidebar.classList.remove("hidden");
-    contentArea.classList.remove("visible");
-}
+  // Hide notification detail and show welcome message
+  window.HideNotif = function() {
+    backButton.style.display = 'none';
+    mainContent.innerHTML = `<p>Sélectionnez une notification pour afficher son contenu.</p>`;
+  };
 
-// 🧵 FILTERS
-function filterMentions() {
-    document.querySelectorAll(".notification").forEach(notif => {
-        notif.style.display = notif.dataset.type === "mention" ? "block" : "none";
+  // Toggle sidebar visibility
+  window.toggleNav = function() {
+    sidebar.style.display = sidebar.style.display === 'block' ? 'none' : 'block';
+  };
+
+  // Filter notifications by "mention"
+  window.filterMentions = function() {
+    filterNotifications('mention');
+  };
+
+  // Filter notifications by unread only
+  window.filterUnread = function() {
+    filterNotifications(null, true);
+  };
+
+  // Show all notifications
+  window.showAllNotifications = function() {
+    filterNotifications();
+  };
+
+  // Helper to filter notifications list items
+  function filterNotifications(type = null, unreadOnly = false) {
+    const notifications = document.querySelectorAll('.notification');
+    notifications.forEach(notif => {
+      let show = true;
+      if (type && notif.dataset.type !== type) show = false;
+      if (unreadOnly && !notif.classList.contains('unread')) show = false;
+      notif.style.display = show ? 'block' : 'none';
     });
-}
+  }
 
-function filterUnread() {
-    document.querySelectorAll(".notification").forEach(notif => {
-        notif.style.display = notif.classList.contains("unread") ? "block" : "none";
-    });
-}
-
-function showAllNotifications() {
-    document.querySelectorAll(".notification").forEach(notif => {
-        notif.style.display = "block";
-    });
-}
+  // Initial load
+  fetchNotifications();
+  HideNotif(); // Show welcome message on load
+});
