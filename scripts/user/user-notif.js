@@ -16,21 +16,52 @@ document.addEventListener("DOMContentLoaded", async () => {
         console.error("Erreur lors de la récupération des notifications :", error);
     }
 });
-
-async function fetchNotifications(token) {
-    const response = await fetch(`${BACKEND_URL}/notifications/me`, {
-        method: "GET",
-        headers: {
-            "Authorization": `Bearer ${token}`,
-            "Content-Type": "application/json"
-        }
+async function markNotificationRead(notificationId) {
+  try {
+    const response = await fetch(`https://your-backend-domain.com/notifications/${notificationId}/read`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${yourAccessToken}`,
+        'Content-Type': 'application/json'
+      }
     });
 
     if (!response.ok) {
-        throw new Error("Échec de la récupération des notifications");
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    return await response.json(); // Assumed to be a list of notification objects
+    const result = await response.json();
+    console.log('Mark read result:', result);
+    return result;
+
+  } catch (error) {
+    console.error('Erreur lors du marquage de notification comme lue :', error);
+    throw error;
+  }
+}
+
+async function fetchNotifications() {
+  try {
+    const response = await fetch('https://your-backend-domain.com/notifications/', {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${yourAccessToken}`,  // insert your JWT token here
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const notifications = await response.json();
+    console.log('Notifications:', notifications);
+    return notifications;
+
+  } catch (error) {
+    console.error('Erreur lors de la récupération des notifications :', error);
+    throw error;
+  }
 }
 
 function displayNotifications(notifs) {
