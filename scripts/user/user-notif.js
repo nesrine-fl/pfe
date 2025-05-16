@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const sidebar = document.getElementById('sidebar');
 
 
-const API_URL = 'https://backend-m6sm.onrender.com';
+const API_URL = 'https://backend-m6sm.onrender.com/api/notifications';
 
 
 
