@@ -1,16 +1,15 @@
 const BACKEND_URL = "https://backend-m6sm.onrender.com";
 
-// ✅ Auth token (ex. récupéré après login)
-const accessToken = "ACCESS_TOKEN_ICI"; // ⛔ REMPLACE ceci par le vrai token JWT
-
 document.addEventListener("DOMContentLoaded", async () => {
-    if (!accessToken) {
+    const token = localStorage.getItem("access_token");
+
+    if (!token) {
         alert("Utilisateur non connecté");
         return;
     }
 
     try {
-        const notifications = await fetchNotifications(accessToken);
+        const notifications = await fetchNotifications(token);
         displayNotifications(notifications);
         sortNotifications();
     } catch (error) {
@@ -18,17 +17,19 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 });
 
+// 🔄 FETCH notifications
 async function fetchNotifications(token) {
     try {
         const response = await fetch(`${BACKEND_URL}/notifications/`, {
             method: "GET",
             headers: {
-                "Authorization": `Bearer ${token}`
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json"
             }
         });
 
         if (!response.ok) {
-            throw new Error(`Échec de la récupération des notifications - Code ${response.status}`);
+            throw new Error("Échec de la récupération des notifications");
         }
 
         return await response.json();
@@ -38,30 +39,31 @@ async function fetchNotifications(token) {
     }
 }
 
+// ✅ MARK AS READ
 async function markNotificationRead(notificationId) {
+    const token = localStorage.getItem("access_token");
+
     try {
         const response = await fetch(`${BACKEND_URL}/notifications/${notificationId}/read`, {
-            method: 'PUT',
+            method: "PUT",
             headers: {
-                'Authorization': `Bearer ${accessToken}`,
-                'Content-Type': 'application/json'
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json"
             }
         });
 
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            throw new Error(`Erreur HTTP : ${response.status}`);
         }
 
-        const result = await response.json();
-        console.log('Mark read result:', result);
-        return result;
-
+        return await response.json();
     } catch (error) {
-        console.error('Erreur lors du marquage de notification comme lue :', error);
+        console.error("Erreur lors du marquage :", error);
         throw error;
     }
 }
 
+// 📬 DISPLAY notifications
 function displayNotifications(notifs) {
     const notificationList = document.querySelector(".notifications");
     notificationList.innerHTML = "";
@@ -70,23 +72,33 @@ function displayNotifications(notifs) {
         const div = document.createElement("div");
         div.classList.add("notification");
         if (!notif.read) div.classList.add("unread");
-        div.dataset.id = notif.id;
+
         div.dataset.type = notif.type;
         div.dataset.content = notif.content;
+        div.dataset.id = notif.id;
+
         div.innerHTML = `
-            <span class="message">${notif.title || "Notification"}</span>
+            <span class="message">${notif.title}</span>
             <span class="timestamp">${getTimestamp()}</span>
         `;
-        div.addEventListener("click", () => showNotification(div));
+
+        div.addEventListener("click", async () => {
+            showNotification(div);
+            await markNotificationRead(notif.id);
+            div.classList.remove("unread");
+        });
+
         notificationList.appendChild(div);
     });
 }
 
+// ⏱ TIMESTAMP
 function getTimestamp() {
-    let now = new Date();
+    const now = new Date();
     return `${now.getHours()}:${now.getMinutes().toString().padStart(2, "0")}`;
 }
 
+// 🧮 SORT notifications
 function sortNotifications() {
     const notificationList = document.querySelector(".notifications");
     const notifications = Array.from(notificationList.children);
@@ -100,13 +112,15 @@ function sortNotifications() {
     notifications.forEach(notif => notificationList.appendChild(notif));
 }
 
+// 🎛️ SIDEBAR toggle
 function toggleNav() {
     document.getElementById("sidebar").classList.toggle("active");
 }
 
+// 🔎 SHOW notif content
 function showNotification(element) {
-    let contentArea = document.querySelector(".main-content");
-    let sidebar = document.querySelector(".sidebar1");
+    const contentArea = document.querySelector(".main-content");
+    const sidebar = document.querySelector(".sidebar1");
 
     contentArea.innerHTML = `
         <span id="backButton" class="material-symbols-outlined" onclick="HideNotif()">arrow_back</span>
@@ -116,15 +130,17 @@ function showNotification(element) {
     contentArea.classList.add("visible");
 }
 
+// 🔙 HIDE content
 function HideNotif() {
-    let contentArea = document.querySelector(".main-content");
-    let sidebar = document.querySelector(".sidebar1");
+    const contentArea = document.querySelector(".main-content");
+    const sidebar = document.querySelector(".sidebar1");
 
     contentArea.innerHTML = `<p>Sélectionnez une notification pour voir les détails.</p>`;
     sidebar.classList.remove("hidden");
     contentArea.classList.remove("visible");
 }
 
+// 🧵 FILTERS
 function filterMentions() {
     document.querySelectorAll(".notification").forEach(notif => {
         notif.style.display = notif.dataset.type === "mention" ? "block" : "none";
