@@ -1,125 +1,130 @@
-// Toggle sidebar nav
-function toggleNav() {
-    document.getElementById("sidebar").classList.toggle("active");
-}
+<script>
+    // Toggle sidebar visibility
+    function toggleNav() {
+        document.getElementById("sidebar").classList.toggle("active");
+    }
 
-// Generate timestamp (HH:MM)
-function getTimestamp() {
-    let now = new Date();
-    return `${now.getHours()}:${now.getMinutes().toString().padStart(2, "0")}`;
-}
+    // Show full notification in main area
+    function showNotification(element) {
+        let contentArea = document.querySelector(".main-content");
+        let sidebar = document.querySelector(".sidebar1");
 
-// Sort notifications by timestamp (latest first)
-function sortNotifications() {
-    let notificationList = document.querySelector(".notifications");
-    let notifications = Array.from(notificationList.children);
-    
-    notifications.sort((a, b) => {
-        let timeA = a.querySelector(".timestamp").innerText;
-        let timeB = b.querySelector(".timestamp").innerText;
-        return timeB.localeCompare(timeA);
-    });
+        // Update content
+        contentArea.innerHTML = `
+            <span id="backButton" class="material-symbols-outlined" onclick="HideNotif()">arrow_back</span>
+            <div class="notif">${element.dataset.content}</div>
+        `;
 
-    notifications.forEach((notif) => notificationList.appendChild(notif));
-}
+        // Hide sidebar, show content
+        sidebar.classList.add("hidden");
+        contentArea.classList.add("visible");
 
-// Show notification content in main area
-function showNotification(element) {
-    let contentArea = document.querySelector(".main-content");
-    let sidebar = document.querySelector(".sidebar1");
-
-    contentArea.innerHTML = `
-        <span id="backButton" class="material-symbols-outlined" onclick="HideNotif()">arrow_back</span>
-        <div class="notif">${element.dataset.content}</div>`;
-
-    sidebar.classList.add("hidden");
-    contentArea.classList.add("visible");
-
-    element.classList.remove("unread"); // Mark as read visually
-    element.dataset.read = "true";
-}
-
-// Hide notification content, show sidebar again
-function HideNotif() {
-    let contentArea = document.querySelector(".main-content");
-    let sidebar = document.querySelector(".sidebar1");
-
-    contentArea.innerHTML = `<p>Sélectionnez une notification pour voir les détails.</p>`;
-    sidebar.classList.remove("hidden");
-    contentArea.classList.remove("visible");
-}
-
-// Filter mentions only
-function filterMentions() {
-    let notifications = document.querySelectorAll(".notification");
-    notifications.forEach(notif => {
-        notif.style.display = notif.dataset.type === "mention" ? "block" : "none";
-    });
-}
-
-// Filter unread only
-function filterUnread() {
-    let notifications = document.querySelectorAll(".notification");
-    notifications.forEach(notif => {
-        notif.style.display = notif.classList.contains("unread") ? "block" : "none";
-    });
-}
-
-// Show all notifications (clear filter)
-function showAllNotifications() {
-    document.querySelectorAll(".notification").forEach(notif => {
-        notif.style.display = "block";
-    });
-}
-
-// Fetch notifications from backend API and render in sidebar
-async function fetchNotifications() {
-    try {
-        const response = await fetch("https://your-api-url.com/api/notifications", {
-            credentials: "include" // if your API requires cookies or authentication
+        // Mark as read in backend
+        const token = localStorage.getItem("access_token");
+        fetch(`https://backend-m6sm.onrender.com/notifications/${element.dataset.id}/read`, {
+            method: "PUT",
+            headers: {
+                "Authorization": `Bearer ${token}`
+            }
         });
-        if (!response.ok) throw new Error("Network response was not ok");
-        
-        const notifications = await response.json();
 
-        const notificationList = document.querySelector(".notifications");
-        notificationList.innerHTML = ""; // Clear existing notifications
+        // Update local display
+        element.classList.remove("unread");
+        element.dataset.read = "true";
+    }
+
+    // Hide detail view and go back to sidebar
+    function HideNotif() {
+        document.querySelector(".main-content").innerHTML = `<p>Sélectionnez une notification pour voir les détails.</p>`;
+        document.querySelector(".sidebar1").classList.remove("hidden");
+        document.querySelector(".main-content").classList.remove("visible");
+    }
+
+    // Filters
+    function filterMentions() {
+        document.querySelectorAll(".notification").forEach(notif => {
+            notif.style.display = notif.dataset.type === "mention" ? "block" : "none";
+        });
+    }
+
+    function filterUnread() {
+        document.querySelectorAll(".notification").forEach(notif => {
+            notif.style.display = notif.dataset.read === "false" ? "block" : "none";
+        });
+    }
+
+    function showAllNotifications() {
+        document.querySelectorAll(".notification").forEach(notif => {
+            notif.style.display = "block";
+        });
+    }
+
+    // Fetch and render notifications from backend
+    document.addEventListener("DOMContentLoaded", async () => {
+        const token = localStorage.getItem("access_token");
+        if (!token) {
+            alert("Utilisateur non connecté.");
+            return;
+        }
+
+        try {
+            const response = await fetch("https://backend-m6sm.onrender.com/notifications/", {
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            });
+
+            if (!response.ok) throw new Error("Erreur de chargement des notifications");
+
+            const notifications = await response.json();
+            renderNotifications(notifications);
+            sortNotifications();
+        } catch (error) {
+            console.error(error);
+            document.querySelector(".notifications").innerHTML = "<p>Erreur de chargement.</p>";
+        }
+    });
+
+    function getTimestamp() {
+        const now = new Date();
+        return `${now.getHours()}:${now.getMinutes().toString().padStart(2, "0")}`;
+    }
+
+    function sortNotifications() {
+        const container = document.querySelector(".notifications");
+        const items = Array.from(container.children);
+        items.sort((a, b) => {
+            const timeA = a.querySelector(".timestamp").innerText;
+            const timeB = b.querySelector(".timestamp").innerText;
+            return timeB.localeCompare(timeA);
+        });
+        items.forEach(item => container.appendChild(item));
+    }
+
+    function renderNotifications(notifications) {
+        const container = document.querySelector(".notifications");
+        container.innerHTML = "";
 
         notifications.forEach(notif => {
-            const notifElement = document.createElement("div");
-            notifElement.classList.add("notification");
-            if (!notif.read) notifElement.classList.add("unread");
+            const div = document.createElement("div");
+            div.className = "notification";
+            if (!notif.read) div.classList.add("unread");
 
-            // Assuming your notification object has id, message, type, content, timestamp fields
-            notifElement.dataset.id = notif.id;
-            notifElement.dataset.type = notif.type || "general"; 
-            notifElement.dataset.content = notif.content || notif.message;
-            notifElement.dataset.read = notif.read ? "true" : "false";
+            div.dataset.type = notif.type;
+            div.dataset.read = notif.read;
+            div.dataset.content = notif.content;
+            div.dataset.id = notif.id;
 
-            notifElement.innerHTML = `
-                <p class="message">${notif.message}</p>
-                <span class="timestamp">${notif.timestamp || getTimestamp()}</span>
+            div.innerHTML = `
+                <div class="notif-header">${notif.title}</div>
+                <div class="timestamp">${getTimestamp()}</div>
             `;
 
-            notifElement.onclick = () => showNotification(notifElement);
+            div.addEventListener("click", function () {
+                showNotification(this);
+            });
 
-            notificationList.appendChild(notifElement);
+            container.appendChild(div);
         });
-
-        sortNotifications();
-    } catch (error) {
-        console.error("Fetch error:", error);
-        // Optional: show error message in UI
     }
-}
-
-// On page load
-document.addEventListener("DOMContentLoaded", () => {
-    fetchNotifications();
-
-    // Initialize timestamps for any unread (if you still want this)
-    document.querySelectorAll(".notification.unread").forEach(notif => {
-        notif.querySelector(".timestamp").innerText = getTimestamp();
-    });
-    sortNotifications();
-});
+</script>
