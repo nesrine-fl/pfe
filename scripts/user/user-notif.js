@@ -1,41 +1,39 @@
-// --- Dynamic Notification Logic with token and clean rendering ---
-
-// Toggle sidebar visibility
+// --- Toggle sidebar ---
 function toggleNav() {
     document.getElementById("sidebar").classList.toggle("active");
 }
 
-// Show full notification in main content
+// --- Show full notification in main content ---
 function showNotification(element) {
     const contentArea = document.querySelector(".main-content");
     const sidebar = document.querySelector(".sidebar1");
     const token = localStorage.getItem("access_token");
 
-    if (!element || !contentArea || !sidebar) return;
+    if (!element || !contentArea || !sidebar || !token) return;
 
-    // Display notification content
+    // Update content area
     contentArea.innerHTML = `
         <span id="backButton" class="material-symbols-outlined" onclick="HideNotif()">arrow_back</span>
         <div class="notif">${element.dataset.content}</div>
     `;
-
     sidebar.classList.add("hidden");
     contentArea.classList.add("visible");
 
-    // Mark notification as read in backend
+    // Mark as read in backend
     fetch(`https://backend-m6sm.onrender.com/notifications/${element.dataset.id}/read`, {
         method: "PUT",
         headers: {
-            "Authorization": `Bearer ${token}`
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
         }
     }).catch(err => console.error("Erreur de mise à jour :", err));
 
-    // Update frontend visual state
+    // Update frontend visual
     element.classList.remove("unread");
     element.dataset.read = "true";
 }
 
-// Hide full notification and return to sidebar view
+// --- Return to notifications list ---
 function HideNotif() {
     const contentArea = document.querySelector(".main-content");
     const sidebar = document.querySelector(".sidebar1");
@@ -47,8 +45,7 @@ function HideNotif() {
     contentArea.classList.remove("visible");
 }
 
-// --- Filter functions ---
-
+// --- Filter Buttons ---
 function filterMentions() {
     document.querySelectorAll(".notification").forEach(notif => {
         notif.style.display = notif.dataset.type === "mention" ? "block" : "none";
@@ -67,19 +64,18 @@ function showAllNotifications() {
     });
 }
 
-// --- Fetch notifications from backend ---
+// --- Fetch Notifications from Backend ---
 async function fetchNotifications() {
     const container = document.querySelector(".notifications");
     const token = localStorage.getItem("access_token");
 
-    if (!container) return;
+    if (!container || !token) return;
 
     try {
-        if (!token) throw new Error("Token d'authentification manquant");
-
         const response = await fetch("https://backend-m6sm.onrender.com/notifications/", {
             headers: {
-                "Authorization": `Bearer ${token}`
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json"
             }
         });
 
@@ -100,26 +96,26 @@ async function fetchNotifications() {
     }
 }
 
-// --- Render notifications into sidebar ---
+// --- Render Notifications ---
 function renderNotifications(notifications) {
     const container = document.querySelector(".notifications");
     if (!container) return;
 
-    container.innerHTML = "";
+    container.innerHTML = ""; // Clear old content
 
     notifications.forEach(notif => {
         const div = document.createElement("div");
         div.className = "notification";
         if (!notif.is_read) div.classList.add("unread");
 
-        // Set data attributes
+        // Data attributes for filtering and detail
         div.dataset.type = notif.type;
         div.dataset.read = notif.is_read ? "true" : "false";
         div.dataset.content = notif.message;
         div.dataset.id = notif.id;
         div.dataset.timestamp = notif.created_at;
 
-        // Content
+        // Display content
         div.innerHTML = `
             <div class="notif-header">${notif.title}</div>
             <div class="timestamp">${formatTimestamp(notif.created_at)}</div>
@@ -136,7 +132,7 @@ function formatTimestamp(isoString) {
     return `${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}`;
 }
 
-// --- Sort notifications by most recent ---
+// --- Sort by Newest ---
 function sortNotifications() {
     const container = document.querySelector(".notifications");
     if (!container) return;
@@ -146,5 +142,5 @@ function sortNotifications() {
     items.forEach(item => container.appendChild(item));
 }
 
-// --- Load notifications on page load ---
+// --- Load on Page ---
 document.addEventListener("DOMContentLoaded", fetchNotifications);
