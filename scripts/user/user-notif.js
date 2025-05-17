@@ -58,9 +58,7 @@ function showAllNotifications() {
 
 async function fetchNotifications() {
     try {
-   const response = await fetch("https://backend-m6sm.onrender.com/notifications", {
-        
-
+        const response = await fetch("https://backend-m6sm.onrender.com/notifications");
         const notifications = await response.json();
         renderNotifications(notifications);
         sortNotifications();
@@ -77,17 +75,18 @@ function renderNotifications(notifications) {
     notifications.forEach(notif => {
         const div = document.createElement("div");
         div.className = "notification";
-        if (!notif.read) div.classList.add("unread");
+        if (!notif.is_read && notif.is_read !== undefined) div.classList.add("unread");
+        else if (!notif.read && notif.read !== undefined) div.classList.add("unread");
 
-        div.dataset.type = notif.type;
-        div.dataset.read = notif.read ? "true" : "false";
-        div.dataset.content = notif.content;
-        div.dataset.id = notif.id;
-        div.dataset.timestamp = notif.timestamp;
+        div.dataset.type = notif.type || "";
+        div.dataset.read = (notif.is_read || notif.read) ? "true" : "false";
+        div.dataset.content = notif.message || notif.content || "";
+        div.dataset.id = notif.id || "";
+        div.dataset.timestamp = notif.created_at || notif.timestamp || "";
 
         div.innerHTML = `
-            <div class="notif-header">${notif.message}</div>
-            <div class="timestamp">${notif.timestamp}</div>
+            <div class="notif-header">${notif.title || notif.message || "Notification"}</div>
+            <div class="timestamp">${formatTimestamp(div.dataset.timestamp)}</div>
         `;
 
         div.addEventListener("click", function () {
@@ -97,6 +96,7 @@ function renderNotifications(notifications) {
         container.appendChild(div);
     });
 }
+
 
 document.addEventListener("DOMContentLoaded", fetchNotifications);
 
