@@ -127,4 +127,4 @@
             container.appendChild(div);
         });
     }
-</script>
+
