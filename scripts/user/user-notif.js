@@ -60,30 +60,37 @@
     }
 
     // Fetch and render notifications from backend
-    document.addEventListener("DOMContentLoaded", async () => {
-        const token = localStorage.getItem("access_token");
-        if (!token) {
-            alert("Utilisateur non connecté.");
-            return;
-        }
+    async function fetchNotifications() {
+  const token = localStorage.getItem("access_token");
 
-        try {
-            const response = await fetch("https://backend-m6sm.onrender.com/notifications/", {
-                headers: {
-                    "Authorization": `Bearer ${token}`
-                }
-            });
+  if (!token) {
+    alert("Utilisateur non connecté.");
+    return;
+  }
 
-            if (!response.ok) throw new Error("Erreur de chargement des notifications");
-
-            const notifications = await response.json();
-            renderNotifications(notifications);
-            sortNotifications();
-        } catch (error) {
-            console.error(error);
-            document.querySelector(".notifications").innerHTML = "<p>Erreur de chargement.</p>";
-        }
+  try {
+    const response = await fetch("https://backend-m6sm.onrender.com/notifications/", {
+      headers: {
+        "Authorization": `Bearer ${token}`,
+      },
     });
+
+    if (!response.ok) {
+      throw new Error("Erreur de chargement des notifications");
+    }
+
+    const notifications = await response.json();
+    renderNotifications(notifications);
+    sortNotifications();
+
+  } catch (error) {
+    console.error(error);
+    document.querySelector(".notifications").innerHTML = "<p>Erreur de chargement.</p>";
+  }
+}
+
+// Call it when DOM is loaded:
+document.addEventListener("DOMContentLoaded", fetchNotifications);
 
     function getTimestamp() {
         const now = new Date();
