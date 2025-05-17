@@ -97,8 +97,16 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 async function fetchNotifications() {
+    const token = localStorage.getItem("access_token");
+
     try {
-        const response = await fetch("https://backend-m6sm.onrender.com/notifications/");
+        const response = await fetch("https://backend-m6sm.onrender.com/notifications/", {
+            method: "GET",
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json"
+            }
+        });
 
         if (!response.ok) {
             throw new Error("Erreur de chargement des notifications");
@@ -106,12 +114,13 @@ async function fetchNotifications() {
 
         const notifications = await response.json();
         renderNotifications(notifications);
-        sortNotifications(); // Optional: sort after render
+        sortNotifications();
     } catch (error) {
         console.error(error);
         document.querySelector(".notifications").innerHTML = "<p>Erreur de chargement.</p>";
     }
 }
+
 
 function renderNotifications(notifications) {
     const container = document.querySelector(".notifications");
