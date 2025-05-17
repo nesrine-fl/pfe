@@ -1,4 +1,4 @@
-<script>
+
     // Toggle sidebar visibility
     function toggleNav() {
         document.getElementById("sidebar").classList.toggle("active");
