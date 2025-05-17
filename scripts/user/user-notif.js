@@ -55,22 +55,36 @@ function showAllNotifications() {
         notif.style.display = "block";
     });
 }
-
 async function fetchNotifications() {
     try {
-        const response = await fetch("https://backend-m6sm.onrender.com/notifications");
+        const token = localStorage.getItem("access_token");
+        if (!token) {
+            throw new Error("Token d'authentification manquant");
+        }
+
+        const response = await fetch("https://backend-m6sm.onrender.com/notifications/", {
+            headers: {
+                "Authorization": `Bearer ${token}`
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`Erreur HTTP ${response.status}`);
+        }
+
         const notifications = await response.json();
+
+        if (!Array.isArray(notifications)) {
+            throw new Error("Réponse inattendue : ce n'est pas un tableau");
+        }
+
         renderNotifications(notifications);
         sortNotifications();
     } catch (error) {
-        console.error(error);
-        document.querySelector(".notifications").innerHTML = "<p>Erreur de chargement.</p>";
+        console.error("Échec du chargement de Fetch :", error);
+        document.querySelector(".notifications").innerHTML = `<p>Erreur de chargement : ${error.message}</p>`;
     }
 }
-
-function renderNotifications(notifications) {
-    const container = document.querySelector(".notifications");
-    container.innerHTML = "";
 
     notifications.forEach(notif => {
         const div = document.createElement("div");
