@@ -20,11 +20,9 @@ function showNotification(element) {
 
     // Mark as read in backend
     const token = localStorage.getItem("access_token");
-    fetch(`https://backend-m6sm.onrender.com/api/notifications/${element.dataset.id}/read`, {
+   fetch(`https://backend-m6sm.onrender.com/notifications/${element.dataset.id}/read`, {
         method: "PUT",
-        headers: {
-            "Authorization": `Bearer ${token}`
-        }
+    
     }).catch(err => console.error("Erreur de mise à jour :", err));
 
     // Update display
@@ -60,7 +58,7 @@ function showAllNotifications() {
 
 async function fetchNotifications() {
     try {
-        const response = await fetch("https://backend-m6sm.onrender.com/api/notifications");
+   const response = await fetch("https://backend-m6sm.onrender.com/notifications", {
         if (!response.ok) {
             throw new Error("Erreur de chargement des notifications");
         }
