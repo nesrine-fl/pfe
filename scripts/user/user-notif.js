@@ -109,7 +109,7 @@ async function fetchNotifications() {
 
         container.appendChild(div);
     });
-}
+
 
 
 document.addEventListener("DOMContentLoaded", fetchNotifications);
