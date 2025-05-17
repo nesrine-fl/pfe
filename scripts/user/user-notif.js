@@ -92,4 +92,49 @@ function HideNotif() {
     sidebar.classList.remove("hidden");
     contentArea.classList.remove("visible");
 }
+document.addEventListener("DOMContentLoaded", function () {
+    fetchNotifications();
+});
+
+async function fetchNotifications() {
+    try {
+        const response = await fetch("https://backend-m6sm.onrender.com/api/notifications");
+        if (!response.ok) {
+            throw new Error("Erreur de chargement des notifications");
+        }
+
+        const notifications = await response.json();
+        renderNotifications(notifications);
+        sortNotifications(); // Optional: sort after render
+    } catch (error) {
+        console.error(error);
+        document.querySelector(".notifications").innerHTML = "<p>Erreur de chargement.</p>";
+    }
+}
+
+function renderNotifications(notifications) {
+    const container = document.querySelector(".notifications");
+    container.innerHTML = ""; // Clear existing content
+
+    notifications.forEach(notif => {
+        const notifEl = document.createElement("div");
+        notifEl.classList.add("notification");
+        if (!notif.read) notifEl.classList.add("unread");
+
+        notifEl.dataset.type = notif.type;
+        notifEl.dataset.read = notif.read;
+        notifEl.dataset.content = notif.content;
+
+        notifEl.innerHTML = `
+            <div class="message">${notif.message}</div>
+            <div class="timestamp">${notif.timestamp}</div>
+        `;
+
+        notifEl.addEventListener("click", function () {
+            showNotification(notifEl);
+        });
+
+        container.appendChild(notifEl);
+    });
+}
 
