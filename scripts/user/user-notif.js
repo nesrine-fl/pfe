@@ -59,9 +59,7 @@ function showAllNotifications() {
 async function fetchNotifications() {
     try {
    const response = await fetch("https://backend-m6sm.onrender.com/notifications", {
-        if (!response.ok) {
-            throw new Error("Erreur de chargement des notifications");
-        }
+        
 
         const notifications = await response.json();
         renderNotifications(notifications);
