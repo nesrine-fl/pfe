@@ -102,10 +102,7 @@ async function fetchNotifications() {
     try {
         const response = await fetch("https://backend-m6sm.onrender.com/notifications/", {
             method: "GET",
-            headers: {
-                "Authorization": `Bearer ${token}`,
-                "Content-Type": "application/json"
-            }
+        
         });
 
         if (!response.ok) {
