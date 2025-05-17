@@ -58,21 +58,9 @@ function showAllNotifications() {
     });
 }
 
-// Fetch and render notifications from backend
 async function fetchNotifications() {
-    const token = localStorage.getItem("access_token");
-    if (!token) {
-        alert("Utilisateur non connecté.");
-        return;
-    }
-
     try {
-        const response = await fetch("https://backend-m6sm.onrender.com/api/notifications", {
-            headers: {
-                "Authorization": `Bearer ${token}`,
-            },
-        });
-
+        const response = await fetch("https://backend-m6sm.onrender.com/api/notifications");
         if (!response.ok) {
             throw new Error("Erreur de chargement des notifications");
         }
@@ -80,11 +68,38 @@ async function fetchNotifications() {
         const notifications = await response.json();
         renderNotifications(notifications);
         sortNotifications();
-
     } catch (error) {
         console.error(error);
         document.querySelector(".notifications").innerHTML = "<p>Erreur de chargement.</p>";
     }
+}
+
+function renderNotifications(notifications) {
+    const container = document.querySelector(".notifications");
+    container.innerHTML = "";
+
+    notifications.forEach(notif => {
+        const div = document.createElement("div");
+        div.className = "notification";
+        if (!notif.read) div.classList.add("unread");
+
+        div.dataset.type = notif.type;
+        div.dataset.read = notif.read ? "true" : "false";
+        div.dataset.content = notif.content;
+        div.dataset.id = notif.id;
+        div.dataset.timestamp = notif.timestamp;
+
+        div.innerHTML = `
+            <div class="notif-header">${notif.message}</div>
+            <div class="timestamp">${notif.timestamp}</div>
+        `;
+
+        div.addEventListener("click", function () {
+            showNotification(this);
+        });
+
+        container.appendChild(div);
+    });
 }
 
 document.addEventListener("DOMContentLoaded", fetchNotifications);
