@@ -69,7 +69,7 @@
   }
 
   try {
-    const response = await fetch("https://backend-m6sm.onrender.com/notifications/", {
+    const response = await fetch("https://backend-m6sm.onrender.com/api/notifications", {
       headers: {
         "Authorization": `Bearer ${token}`,
       },
